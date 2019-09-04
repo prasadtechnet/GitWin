@@ -1,0 +1,8 @@
+﻿  public override void OnStartPage(iTextSharp.text.pdf.PdfWriter writer, iTextSharp.text.Document document)
+        {
+            /*<#PdfPageEventPageHeaderCallTables#>*/
+
+            //document.Add(_objPDFPage.getPageHeaderTable(strSubTitle, "MKT:ACR:217:033", PDFHeaderObject.dtMainHdrDetails.Rows[0]["ServiceRepNo"].ToString()));
+            //document.Add(_objPDFPage.getHeaderDetailsTable(PDFHeaderObject.dtHdrDetails));
+
+        }

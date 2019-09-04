@@ -1,0 +1,15 @@
+﻿ public class PdfPageEvent : iTextSharp.text.pdf.PdfPageEventHelper
+    {       
+        /*<#PdfPageEventVaraibles#>*/
+        public PdfPageEvent(/*<#PdfPageEventParameters#>*/ )
+        {
+          /*<#PdfPageEventVaraiblesParameter#>*/
+        }
+
+
+        /*<#PdfPageEventPageFooterMethod#>*/
+       
+
+         /*<#PdfPageEventPageHeaderMethod#>*/
+      
+    }

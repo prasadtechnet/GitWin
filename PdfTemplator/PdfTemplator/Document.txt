@@ -1,0 +1,109 @@
+﻿
+It generates PDF Template with required Input Models. It can easilty integrates into your project
+
+--output//
+1.projName_PdfTemplate.cs
+2.InputModel.cs
+
+--input//
+
+
+Requirements:
+-------------
+Pdf Types with sections
+--1.HCF 
+    a.Page Header (it reapeats on every page)
+    b.Body
+	c.Footer(page number)
+--2.HC (no footer means no page number)
+    a.Page Header (it reapeats on every page)
+	b.Body
+--3.CF
+    a.Content (header only once like report header)
+	b.Footer (page number)
+----------------------------------------------------------------
+
+Controls:
+  1.Table (parent)
+  2.TabelCell(sub table)
+  3.EmptyCell
+  4.LabelCell
+  5.ImageUrlCell
+  6.ImageByteArrayCell
+  7.ImageSubHeaderCell
+
+Master Data
+--------------------------------------------------------------------
+Fonts:
+-Custom Font
+-FontNames:
+-FontStyles:
+-FontSize
+
+Vertical Alignment:
+ a.Top
+ b.Middle
+ c.Bottom
+
+Horizontal Alignments:
+ a.Left
+ b.Right
+ c.Center
+
+Colors:
+  a.default:black
+  b.Custome:RGB codes
+
+Cell Border
+-style
+ a.width
+ b.color
+-visible sides
+ a.default:all(TRBL)
+ .......
+
+ Cell Spans
+ a.RowSpan
+ b.ColSpan
+
+ Cell Padding
+ a.top
+ b.Right
+ c.Bottom
+ d.Left
+
+ --------------------------------------------------------------------
+--Modules
+1.Master Data (UI selection)
+2.FileModule
+  --Read
+  --write
+3.Pdf 
+  -Template Related..
+    a.Template(text files) 
+	  1.PdfCore(abstract template)
+	  2.Document(list of tables)
+	  3.PdfTableMethod
+      4.PageHeader
+	  5.PageFooter
+    b.Set of replaceable Model properties (all strings) in template
+  -Document Generation process
+    a.ControlModels
+	  1.Cell Base Class
+	  2.TableCell
+	    2.1 RowCell
+	  3.LabelCell
+	  4.FieldCell
+	  5.ImageUrlCell
+	  6.ImageByteCell
+	  7.ImageSideheaderCell
+	 b.Pdf Table Methods Generation with inputs
+	 d.Generate Page Header
+	 e.Generate Page Footer Methods
+	 f.Generate PDF Method (include all pdf table methods , Page header and page Footer)
+	 g.Collect Model properties
+	 10.Generate Pdf .cs File
+	 11.Generate Model .cs File
+
+    
+
