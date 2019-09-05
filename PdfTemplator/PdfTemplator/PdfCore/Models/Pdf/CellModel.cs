@@ -9,32 +9,38 @@ namespace PdfTemplator.PdfCore.Models.Pdf
 
     #region Templates
 
-    public class HCF_TemplateModel
+    public class TemplateModel
     {
         public string Name { get; set; }
+        public string NameSpace { get; set; }
+        public string Type { get; set; }
         public List<string> ModelVariables { get; set; }
-        public BodySectionModel Body { get; set; }
-        public PageHeaderSection PageHeader { get; set; }
-        public PageFooterSection PageFooter { get; set; }
-        public List<BindingModel> bindingModelProps { get; set; }
-    }
-    public class HC_TemplateModel
-    {
-        public string Name { get; set; }
-        public List<string> ModelVariables { get; set; }
-        public BodySectionModel Body { get; set; }
-        public PageHeaderSection PageHeader { get; set; }
-        public List<BindingModel> bindingModelProps { get; set; }
-    }
-    public class CF_TemplateModel
-    {
-        public string Name { get; set; }
-        public List<string> ModelVariables { get; set; }
-        public BodySectionModel Body { get; set; }      
-        public PageFooterSection PageFooter { get; set; }
         public List<BindingModel> bindingModelProps { get; set; }
     }
 
+    public class HCF_TemplateModel:TemplateModel
+    {     
+        public BodySectionModel Body { get; set; }
+        public PageHeaderSection PageHeader { get; set; }
+        public PageFooterSection PageFooter { get; set; }
+    }
+    public class HC_TemplateModel : TemplateModel
+    {
+       
+        public BodySectionModel Body { get; set; }
+        public PageHeaderSection PageHeader { get; set; }
+    }
+    public class CF_TemplateModel : TemplateModel
+    {
+     
+        public BodySectionModel Body { get; set; }      
+        public PageFooterSection PageFooter { get; set; }
+
+    }
+    public class C_TemplateModel : TemplateModel
+    {  
+        public BodySectionModel Body { get; set; }
+    }
     #endregion
 
     #region Sections
@@ -58,16 +64,17 @@ namespace PdfTemplator.PdfCore.Models.Pdf
     public class TableModel
     {
         public int noofClmns { get; set; }
-        public int widthPercent { get; set; }
-        public int spaceBefore { get; set; }
-        public int spaceAfter { get; set; }
-        public bool isHavingBorder { get; set; }
-        public bool isDynamicTab { get; set; }
-        public List<RowModel> Rows { get; set; }
+        public float width { get; set; } = 530f;
+        public List<float> Colwidth { get; set; }
+        public float spaceBefore { get; set; }
+        public float spaceAfter { get; set; }
+        public bool isHavingBorder { get; set; } = true;
+        public bool isDynamicTab { get; set; } = false;
+        public List<RowModel> Rows { get; set; } = new List<RowModel>();
     }
     public class RowModel
     {
-        public List<CellModel> Cells { get; set; }
+        public List<CellModel> Cells { get; set; } = new List<CellModel>();
     }
 
     #endregion
@@ -78,23 +85,23 @@ namespace PdfTemplator.PdfCore.Models.Pdf
         //cell info
         public int CellNo { get; set; }
         public int RowNo { get; set; }
-        public int Height { get; set; }
+        public float Height { get; set; } = 12f;
         //span
-        public int RowSpan { get; set; }
-        public int ColSpan { get; set; }
+        public int RowSpan { get; set; } = 1;
+        public int ColSpan { get; set; } = 1;
         //border
-       // public bool isHavingBorder { get; set; }
-       // public int noOfSides { get; set; }
-        public string BorderPattren { get; set; }
-        public ColorModel BorderColor { get; set; }
+        // public bool isHavingBorder { get; set; }
+        // public int noOfSides { get; set; }
+        public string BorderPattren { get; set; } = "L,T,R,B";
+        public ColorModel BorderColor { get; set; } = new ColorModel { Type="PDF", pdfColor=iTextSharp.text.Color.BLACK};
         //padding
-        public int PLeft { get; set; }
-        public int PRight { get; set; }
-        public int PTop { get; set; }
-        public int PBottom { get; set; }
+        public float PLeft { get; set; } = 0f;
+        public float PRight { get; set; } = 0f;
+        public float PTop { get; set; } = 0f;
+        public float PBottom { get; set; } = 0f;
         //align
-        public string VAlign { get; set; }
-        public string HAlign { get; set; }
+        public int VAlign { get; set; } = iTextSharp.text.pdf.PdfPCell.ALIGN_TOP;
+        public int HAlign { get; set; } = iTextSharp.text.pdf.PdfPCell.ALIGN_LEFT;
         //content
         public string ContentType { get; set; }
         public CellModel CellObject { get; set; }
@@ -110,10 +117,15 @@ namespace PdfTemplator.PdfCore.Models.Pdf
         public string Text { get; set; }
 
     }
+    public class EmptyCell : CellModel
+    {
+        public string Text { get; set; } = "";
+
+    }
     public class FieldCell : CellModel
     {
-        public FontModel Font { get; set; }
-        public ColorModel Color { get; set; }
+        public FontModel Font { get; set; } = new FontModel {FontFamily="Arial",FontSize=10f };
+        public ColorModel Color { get; set; } = new ColorModel { Type = "PDF", pdfColor = iTextSharp.text.Color.BLACK };
         public string DataFieldName { get; set; }
         public string ModelVariableName { get; set; }
     }
@@ -152,7 +164,7 @@ namespace PdfTemplator.PdfCore.Models.Pdf
     public class FontModel
     {
         public string FontFamily { get; set; }
-        public int FontSize { get; set; }
+        public float FontSize { get; set; }
 
     }
 
@@ -164,6 +176,7 @@ namespace PdfTemplator.PdfCore.Models.Pdf
         public int Green { get; set; }
         public int Blue { get; set; }
 
+        public iTextSharp.text.Color pdfColor { get; set; }
     }
 
     #endregion

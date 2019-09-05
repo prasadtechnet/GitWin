@@ -1,4 +1,6 @@
 ﻿
+using PdfTemplator.PdfCore.Business;
+using PdfTemplator.PdfCore.Models.Pdf;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -20,7 +22,51 @@ namespace PdfTemplator
 
         private void frmPdf_Load(object sender, EventArgs e)
         {
-         
+            var pdfContentT = new C_TemplateModel
+            {
+                Name="TestPdfTemplate",
+                Type="C",
+                NameSpace= "PdfModule",
+                bindingModelProps=new List<BindingModel> { },
+                ModelVariables=new List<string> { },
+                Body=new BodySectionModel {
+                    Tables=new List<TableModel>
+                    {
+                       new TableModel
+                       {
+                           isDynamicTab=false,
+                           isHavingBorder=true,
+                           noofClmns=2,
+                           width=530f,
+                           Colwidth=new List<float>{0.5f,0.5f },
+                           spaceAfter=10f,
+                           spaceBefore=0f,
+                           Rows=new List<RowModel>{
+                               new RowModel{
+                                   Cells=new List<CellModel>
+                                   {
+                                       new LabelCell
+                                       {
+                                           CellNo=1,
+                                           ContentType="Label",
+                                           Text="Test"                                           
+                                       },
+                                       new LabelCell
+                                       {
+                                           CellNo=2,
+                                           ContentType="Label",
+                                           Text="Test Value"
+                                       }
+                                   }
+                               }
+                           }
+
+                       }
+                    }
+                }
+            };
+            IBusinessManager objBM = new BusinessManager(new PdfCore.Business.FileModule.FileModule());
+           var resp=objBM.GeneratePdfTemplate(pdfContentT, "D:\\");
 
         }
 

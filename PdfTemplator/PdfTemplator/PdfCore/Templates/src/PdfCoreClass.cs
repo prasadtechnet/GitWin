@@ -144,7 +144,7 @@ namespace PdfTemplator.PdfCore.Templates
                 tabSig.LockedWidth = true;
                 tabSig.SetWidths(new float[] { 1.0f });
 
-                iTextSharp.text.pdf.PdfPCell cellSig = GetStringCell(SubHeading, 10f, iTextSharp.text.Font.NORMAL, iTextSharp.text.pdf.PdfCell.ALIGN_LEFT, iTextSharp.text.pdf.PdfCell.ALIGN_MIDDLE, 20f, 5f, -1f, 4f, 4f, 0, "", 1, 1);
+                iTextSharp.text.pdf.PdfPCell cellSig = GetStringCell(SubHeading,"" ,10f, iTextSharp.text.Font.NORMAL, iTextSharp.text.Color.BLACK,iTextSharp.text.pdf.PdfCell.ALIGN_LEFT, iTextSharp.text.pdf.PdfCell.ALIGN_MIDDLE, 20f, 5f, -1f, 4f, 4f,"", 1, 1);
 
                 tabSig.AddCell(cellSig);
 

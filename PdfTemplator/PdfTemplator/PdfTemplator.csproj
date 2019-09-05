@@ -61,8 +61,11 @@
     </Compile>
     <Compile Include="PdfCore\Business\BusinessManager.cs" />
     <Compile Include="PdfCore\Business\FileModule\FileModule.cs" />
-    <Compile Include="PdfCore\Business\PdfModule\PdfDictionaryModel.cs" />
+    <Compile Include="PdfCore\Business\PdfModule\PdfFactory.cs" />
+    <Compile Include="PdfCore\Business\PdfModule\PdfTemplateManager.cs" />
+    <Compile Include="PdfCore\Data\Master.cs" />
     <Compile Include="PdfCore\Models\Pdf\CellModel.cs" />
+    <Compile Include="PdfCore\Models\TemplateResponse.cs" />
     <Compile Include="PdfCore\Models\XmlNodeModel.cs" />
     <Compile Include="PdfCore\Templates\src\PdfCoreClass.cs" />
     <Compile Include="PdfCore\Templates\src\PdfDocument.cs" />
@@ -95,9 +98,7 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="PdfCore\Data\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Content Include="Document.txt" />
     <Content Include="PdfCore\Templates\PdfCore.txt" />

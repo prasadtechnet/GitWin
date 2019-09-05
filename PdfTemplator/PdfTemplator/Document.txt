@@ -21,6 +21,8 @@ Pdf Types with sections
 --3.CF
     a.Content (header only once like report header)
 	b.Footer (page number)
+--4.C
+    a.Content (header only once like report header)	
 ----------------------------------------------------------------
 
 Controls:
