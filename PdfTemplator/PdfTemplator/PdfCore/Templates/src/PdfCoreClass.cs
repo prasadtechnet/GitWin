@@ -103,6 +103,18 @@ namespace PdfTemplator.PdfCore.Templates
             cell.PaddingTop = 0f;
             return cell;
         }
+        protected iTextSharp.text.pdf.PdfPCell ImageCell(byte[] path, float scale, int hAlign, int vAlign = iTextSharp.text.pdf.PdfPCell.ALIGN_TOP, iTextSharp.text.Color backColor = null)
+        {
+            iTextSharp.text.Image image = iTextSharp.text.Image.GetInstance(path);       
+            image.ScalePercent(scale);
+            iTextSharp.text.pdf.PdfPCell cell = new iTextSharp.text.pdf.PdfPCell(image);
+            cell.BorderColor = backColor == null ? iTextSharp.text.Color.WHITE : backColor;
+            cell.VerticalAlignment = vAlign;
+            cell.HorizontalAlignment = hAlign;
+            cell.PaddingBottom = 0f;
+            cell.PaddingTop = 0f;
+            return cell;
+        }
 
         protected iTextSharp.text.pdf.PdfPCell ImageCell(string path, float scale, float height, int hAlign, int vAlign= iTextSharp.text.pdf.PdfPCell.ALIGN_TOP, float p_left=0f, float p_right = 0f, float p_top = 0f, float p_btm = 0f, string borderPattren="T,R,B")
         {
@@ -132,8 +144,66 @@ namespace PdfTemplator.PdfCore.Templates
             return cell;
         }
 
-    
-        protected iTextSharp.text.pdf.PdfPCell ImageCell(byte[] path, string SubHeading, float scale, int align, float totalWidth = 250f, float abWidth = 210, int rowSpan = 1, int colSpan = 1)
+        protected iTextSharp.text.pdf.PdfPCell ImageCell(string path, string SubHeading, string FontFamily, float fontSize = 10f, float scale = 50f, float Img_Height = 50f, float lbl_Height = 20f, int lbl_hAlign = iTextSharp.text.pdf.PdfCell.ALIGN_MIDDLE, int fontWeight = iTextSharp.text.Font.NORMAL, float totalWidth = 250f, float abWidth = 210, int rowSpan = 1, int colSpan = 1)
+        {
+
+            iTextSharp.text.pdf.PdfPTable tabSig = new iTextSharp.text.pdf.PdfPTable(1);
+            iTextSharp.text.pdf.PdfPCell cell = null;
+            try
+            {
+
+                tabSig.TotalWidth = totalWidth;
+                tabSig.LockedWidth = true;
+                tabSig.SetWidths(new float[] { 1.0f });
+
+                iTextSharp.text.pdf.PdfPCell cellSig = GetStringCell(SubHeading, FontFamily, fontSize, fontWeight, iTextSharp.text.Color.BLACK, iTextSharp.text.pdf.PdfCell.ALIGN_LEFT, lbl_hAlign, lbl_Height, 5f, -1f, 4f, 4f, "", 1, 1);
+
+                tabSig.AddCell(cellSig);
+
+                if (path != null)
+                {
+                    iTextSharp.text.Image image = iTextSharp.text.Image.GetInstance(path);
+                    //image.ScaleAbsolute(220.0f,50.0f);
+                    //image.ScalePercent(scale);
+                    image.ScaleAbsolute(abWidth, scale);
+                    //  image.ScalePercent(scale);
+
+                    iTextSharp.text.pdf.PdfPCell cellImg = new iTextSharp.text.pdf.PdfPCell(image);
+
+                    cellImg.VerticalAlignment = iTextSharp.text.pdf.PdfPCell.ALIGN_TOP;
+                    cellImg.BorderColor = iTextSharp.text.Color.WHITE;
+                    cellImg.HorizontalAlignment = iTextSharp.text.pdf.PdfPCell.ALIGN_CENTER;
+                    cellImg.FixedHeight = Img_Height;
+                    cellImg.PaddingBottom = 0f;
+                    cellImg.PaddingTop = 1f;
+                    // cellImg.Top = 2f;
+                    tabSig.AddCell(cellImg);
+
+                }
+
+                cell = new iTextSharp.text.pdf.PdfPCell(tabSig);
+                cell.BorderColor = iTextSharp.text.Color.BLACK;
+                cell.HorizontalAlignment = iTextSharp.text.pdf.PdfPCell.ALIGN_LEFT;
+                cell.VerticalAlignment = iTextSharp.text.pdf.PdfPCell.ALIGN_MIDDLE;
+                cell.PaddingTop = 1f;
+                cell.PaddingBottom = 1f;
+                cell.Rowspan = rowSpan;
+                cell.Colspan = colSpan;
+
+
+            }
+            catch (Exception ex)
+            {
+
+            }
+            return cell;
+
+         
+
+        }
+
+
+        protected iTextSharp.text.pdf.PdfPCell ImageCell(byte[] path,string SubHeading,string FontFamily,float fontSize=10f, float scale=50f, float Img_Height=50f, float lbl_Height=20f ,int lbl_hAlign= iTextSharp.text.pdf.PdfCell.ALIGN_MIDDLE, int fontWeight= iTextSharp.text.Font.NORMAL, float totalWidth = 250f, float abWidth = 210, int rowSpan = 1, int colSpan = 1)
         {
             iTextSharp.text.pdf.PdfPTable tabSig = new iTextSharp.text.pdf.PdfPTable(1);
             iTextSharp.text.pdf.PdfPCell cell = null;
@@ -144,7 +214,7 @@ namespace PdfTemplator.PdfCore.Templates
                 tabSig.LockedWidth = true;
                 tabSig.SetWidths(new float[] { 1.0f });
 
-                iTextSharp.text.pdf.PdfPCell cellSig = GetStringCell(SubHeading,"" ,10f, iTextSharp.text.Font.NORMAL, iTextSharp.text.Color.BLACK,iTextSharp.text.pdf.PdfCell.ALIGN_LEFT, iTextSharp.text.pdf.PdfCell.ALIGN_MIDDLE, 20f, 5f, -1f, 4f, 4f,"", 1, 1);
+                iTextSharp.text.pdf.PdfPCell cellSig = GetStringCell(SubHeading, FontFamily, fontSize, fontWeight, iTextSharp.text.Color.BLACK,iTextSharp.text.pdf.PdfCell.ALIGN_LEFT, lbl_hAlign, lbl_Height, 5f, -1f, 4f, 4f,"", 1, 1);
 
                 tabSig.AddCell(cellSig);
 
@@ -153,7 +223,7 @@ namespace PdfTemplator.PdfCore.Templates
                     iTextSharp.text.Image image = iTextSharp.text.Image.GetInstance(path);
                     //image.ScaleAbsolute(220.0f,50.0f);
                     //image.ScalePercent(scale);
-                    image.ScaleAbsolute(abWidth, 50.0f);
+                    image.ScaleAbsolute(abWidth, scale);
                     //  image.ScalePercent(scale);
 
                     iTextSharp.text.pdf.PdfPCell cellImg = new iTextSharp.text.pdf.PdfPCell(image);
@@ -161,7 +231,7 @@ namespace PdfTemplator.PdfCore.Templates
                     cellImg.VerticalAlignment = iTextSharp.text.pdf.PdfPCell.ALIGN_TOP;
                     cellImg.BorderColor = iTextSharp.text.Color.WHITE;
                     cellImg.HorizontalAlignment = iTextSharp.text.pdf.PdfPCell.ALIGN_CENTER;
-                    cellImg.FixedHeight = 50f;
+                    cellImg.FixedHeight = Img_Height;
                     cellImg.PaddingBottom = 0f;
                     cellImg.PaddingTop = 1f;
                     // cellImg.Top = 2f;
@@ -170,7 +240,7 @@ namespace PdfTemplator.PdfCore.Templates
                 }
 
                 cell = new iTextSharp.text.pdf.PdfPCell(tabSig);
-                cell.BorderColor = iTextSharp.text.Color.GRAY;
+                cell.BorderColor = iTextSharp.text.Color.BLACK;
                 cell.HorizontalAlignment = iTextSharp.text.pdf.PdfPCell.ALIGN_LEFT;
                 cell.VerticalAlignment = iTextSharp.text.pdf.PdfPCell.ALIGN_MIDDLE;
                 cell.PaddingTop = 1f;

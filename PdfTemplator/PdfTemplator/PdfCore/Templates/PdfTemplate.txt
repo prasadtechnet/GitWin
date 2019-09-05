@@ -1,4 +1,33 @@
-﻿ private byte[] GeneratePdf(List<iTextSharp.text.pdf.PdfPTable> lsPTables, ref StringBuilder sbLog)
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+ 
+ namespace /*<#ModuleNameSpace>*/
+ {
+ public class /*<#ModuleName>*/ : PdfDesignCore
+    {
+        public byte[] GeneratePDFReport(/*<#PdfReportParams>*/ ref StringBuilder sbLog)
+        {
+            byte[] btReport = null;
+            try
+            {
+              
+                List<PdfPTable> lsPTables = new List<PdfPTable>();
+
+               /*<#PdfReportPTablesList>*/
+               
+
+                btReport = GeneratePdf(lsPTables, ref sbLog);
+            }
+            catch (Exception ex)
+            {
+
+            }
+            return btReport;
+        }
+        private byte[] GeneratePdf(List<PdfPTable> lsPTables, ref StringBuilder sbLog)
         {
             byte[] btPdf = null;
             try
@@ -12,14 +41,15 @@
                         {
 
                             iTextSharp.text.pdf.PdfWriter writer = iTextSharp.text.pdf.PdfWriter.GetInstance(document, memoryStream);
-                            
-                            /*<#PdfDocumentPageEvent#>*/
+							
+							/*<#PdfDocumentPageEvent#>*/
 
                             document.Open();
 
-                            foreach (iTextSharp.text.pdf.PdfPTable tab1 in lsPTables)
+                            foreach (PdfPTable tab1 in lsPTables)
                             {
                                 document.Add(tab1);
+
                             }
 
                             document.Close();
@@ -43,3 +73,9 @@
 
             return btPdf;
         }
+ }
+
+ /*<#PdfDocumentPageEventClass#>*/
+
+ /*<#PdfCoreClass#>*/
+ }

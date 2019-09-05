@@ -106,8 +106,8 @@
     <Content Include="PdfCore\Templates\PdfFooter.txt" />
     <Content Include="PdfCore\Templates\PdfPageEvent.txt" />
     <Content Include="PdfCore\Templates\PdfTableMethod.txt" />
-    <Content Include="PdfCore\Templates\PdfDocument.txt" />
-    <Content Include="PdfCore\Templates\Table.txt" />
+    <Content Include="PdfCore\Templates\ModelTemplate.txt" />
+    <Content Include="PdfCore\Templates\PdfTemplate.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -1,4 +1,4 @@
-﻿private iTextSharp.text.pdf.PdfPTable /*<#TableMethodName#>*/(/*<#TableMethodParams#>*/ , ref StringBuilder sbLog)
+﻿private iTextSharp.text.pdf.PdfPTable /*<#TableMethodName#>*/(/*<#TableMethodParams#>*/ ref StringBuilder sbLog)
         {           
             iTextSharp.text.pdf.PdfPTable /*<#TableVariableName#>*/ = new iTextSharp.text.pdf.PdfPTable(/*<#TableColumnNo#>*/);
             /*<#TableVariableName#>*/.TotalWidth = /*<#TableWidth#>*/;

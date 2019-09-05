@@ -63,12 +63,15 @@ namespace PdfTemplator.PdfCore.Models.Pdf
     #region Table
     public class TableModel
     {
+        public string TableName { get; set; }
+        public bool isChildTab { get; set; } = false;
         public int noofClmns { get; set; }
         public float width { get; set; } = 530f;
         public List<float> Colwidth { get; set; }
         public float spaceBefore { get; set; }
         public float spaceAfter { get; set; }
         public bool isHavingBorder { get; set; } = true;
+        public bool isSeparateMethod { get; set; } = true;
         public bool isDynamicTab { get; set; } = false;
         public List<RowModel> Rows { get; set; } = new List<RowModel>();
     }
@@ -112,22 +115,23 @@ namespace PdfTemplator.PdfCore.Models.Pdf
     }
     public class LabelCell : CellModel
     {
-        public FontModel Font { get; set; }
-        public ColorModel Color { get; set; }
+        public FontModel Font { get; set; } = new FontModel { FontFamily = "Arial", FontSize = 10f, FontWeight = iTextSharp.text.Font.NORMAL };
+        public ColorModel Color { get; set; } = new ColorModel { Type = "PDF", pdfColor = iTextSharp.text.Color.BLACK };
         public string Text { get; set; }
 
     }
     public class EmptyCell : CellModel
     {
+     
         public string Text { get; set; } = "";
 
     }
     public class FieldCell : CellModel
     {
-        public FontModel Font { get; set; } = new FontModel {FontFamily="Arial",FontSize=10f };
+        public FontModel Font { get; set; } = new FontModel {FontFamily="Arial",FontSize=10f, FontWeight = iTextSharp.text.Font.NORMAL };
         public ColorModel Color { get; set; } = new ColorModel { Type = "PDF", pdfColor = iTextSharp.text.Color.BLACK };
         public string DataFieldName { get; set; }
-        public string ModelVariableName { get; set; }
+        public string ModelName { get; set; }
     }
     public class ImageUrlCell : CellModel
     {
@@ -165,7 +169,7 @@ namespace PdfTemplator.PdfCore.Models.Pdf
     {
         public string FontFamily { get; set; }
         public float FontSize { get; set; }
-
+        public int FontWeight { get; set; }
     }
 
     public class ColorModel

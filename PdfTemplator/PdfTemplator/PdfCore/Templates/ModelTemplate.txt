@@ -1,0 +1,3 @@
+﻿public class /*<#ModelClassName#>*/ \r\n{\r\n /*<#ModelClassProps#>*/ \r\n}
+
+public string /*<#ModelProps#>*/ {get; set;}

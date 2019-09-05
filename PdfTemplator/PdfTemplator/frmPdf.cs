@@ -22,13 +22,17 @@ namespace PdfTemplator
 
         private void frmPdf_Load(object sender, EventArgs e)
         {
+
+        //  var strRes= Enum.GetName(typeof(PdfCore.Business.PdfModule.TemplatePhysicalFile), 1);
+
+          
             var pdfContentT = new C_TemplateModel
             {
-                Name="TestPdfTemplate",
+                Name="TestPdfTemplate",                
                 Type="C",
-                NameSpace= "PdfModule",
-                bindingModelProps=new List<BindingModel> { },
-                ModelVariables=new List<string> { },
+                NameSpace= "PdfModule.PDF",
+                bindingModelProps=new List<BindingModel> { new BindingModel {ModelVariable= "HeaderDetail", PropName= "TestValue" } },
+                ModelVariables=new List<string> { "HeaderDetail" },
                 Body=new BodySectionModel {
                     Tables=new List<TableModel>
                     {
@@ -36,6 +40,9 @@ namespace PdfTemplator
                        {
                            isDynamicTab=false,
                            isHavingBorder=true,
+                           isChildTab=false,
+                           isSeparateMethod=true,
+                           TableName="Detail",
                            noofClmns=2,
                            width=530f,
                            Colwidth=new List<float>{0.5f,0.5f },
@@ -49,14 +56,33 @@ namespace PdfTemplator
                                        {
                                            CellNo=1,
                                            ContentType="Label",
-                                           Text="Test"                                           
+                                           Text="Test"
                                        },
-                                       new LabelCell
+                                        new EmptyCell
                                        {
                                            CellNo=2,
-                                           ContentType="Label",
-                                           Text="Test Value"
+                                           ContentType="EMPTYCELL",
+                                           Text=""
+                                       },
+                                        new FieldCell
+                                        {
+                                            CellNo=3,
+                                            ContentType="FIELD",
+                                            DataFieldName="TestValue",
+                                            ModelName="HeaderDetail"
+                                        },
+                                        new EmptyCell
+                                       {
+                                           CellNo=4,
+                                           ContentType="EMPTYCELL",
+                                           Text=""
                                        }
+                                       //new LabelCell
+                                       //{
+                                       //    CellNo=2,
+                                       //    ContentType="Label",
+                                       //    Text="Test Value"
+                                       //}
                                    }
                                }
                            }
