@@ -34,7 +34,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="itextsharp">
-      <HintPath>..\..\..\..\VOLTAS\Voltas Enhancements FFR 15-03-2018\Pdf\PdfTemplate\PdfTemplate\bin\Debug\itextsharp.dll</HintPath>
+      <HintPath>..\..\..\..\office\Projects\Voltas\Voltas Enhancements FFR 15-03-2018\Pdf\PdfTemplate\PdfTemplate\bin\Debug\itextsharp.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>

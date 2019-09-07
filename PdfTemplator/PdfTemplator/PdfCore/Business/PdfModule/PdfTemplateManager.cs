@@ -56,6 +56,7 @@ namespace PdfTemplator.PdfCore.Business.PdfModule
                 { "ModuleNameSpace","/*<#ModuleNameSpace>*/"},
                 { "ModuleName","/*<#ModuleName>*/"},
                 { "PdfReportParams","/*<#PdfReportParams>*/"},
+                { "PdfReportPTableCallingList"," /*<#PdfReportPTableCallingList>*/"},
                 { "PdfReportPTablesList","/*<#PdfReportPTablesList>*/"},
                 { "PdfDocumentPageEventClass","/*<#PdfDocumentPageEventClass#>*/"},
                 { "PdfCoreClass","/*<#PdfCoreClass#>*/"},

@@ -16,7 +16,7 @@ using System.Threading.Tasks;
               
                 List<PdfPTable> lsPTables = new List<PdfPTable>();
 
-               /*<#PdfReportPTablesList>*/
+               /*<#PdfReportPTableCallingList>*/
                
 
                 btReport = GeneratePdf(lsPTables, ref sbLog);
@@ -73,6 +73,8 @@ using System.Threading.Tasks;
 
             return btPdf;
         }
+
+		/*<#PdfReportPTablesList>*/
  }
 
  /*<#PdfDocumentPageEventClass#>*/

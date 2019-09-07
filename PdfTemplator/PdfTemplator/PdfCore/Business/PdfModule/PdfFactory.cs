@@ -171,7 +171,7 @@ namespace PdfTemplator.PdfCore.Business.PdfModule
                     objEmpty.BorderPattren,
                     objEmpty.RowSpan,
                     objEmpty.ColSpan,
-                    null
+                    "null"
               });
             }
             catch (Exception ex)
@@ -451,29 +451,35 @@ namespace PdfTemplator.PdfCore.Business.PdfModule
                         if (objInput.Body.Tables.Count > 0)
                         {
                             List<string> lsTables = new List<string>();
-                            List<string> lsPdfTables = new List<string>();
+                            List<string> lsTableCalling = new List<string>();
+                            List<string> lsPdfTableModelInputs = new List<string>();
                             var strParams = "";
                             foreach (var tab in objInput.Body.Tables)
                             {
-                                lsPdfTables = new List<string>();
+                                lsPdfTableModelInputs = new List<string>();
                                 strParams = "";
 
-                                lsTables.Add(ProcessTable(tab,out lsPdfTables));
+                                lsTables.Add(ProcessTable(tab,out lsPdfTableModelInputs));
 
-                                if(lsPdfTables.Count>0)
-                                    strParams = string.Join(",", lsPdfTables.Select(x => x + " obj" + x).ToArray())+",";
+                                if(lsPdfTableModelInputs.Count>0)
+                                    strParams = string.Join(",", lsPdfTableModelInputs.Select(x => "obj" + x).ToArray()) + ",";
+                               // strParams = string.Join(",", lsPdfTableModelInputs.Select(x => x + " obj" + x).ToArray())+",";
 
-                                lsTables.Add("lsPTables.Add("+ strParams + " ref StringBuilder sbLog);");
+                                lsTableCalling.Add("lsPTables.Add("+tab.TableName+"Method(" + strParams + " ref sbLog));");
                             }
 
                             var reportParams = "";
                             var listOfmethods = "";
+                            var listOfmethodCalling = "";
 
-                           if(objTemplate.ModelVariables.Count>0)
-                                reportParams =String.Join(",", objTemplate.ModelVariables.Select(x => x + " obj" + x).ToArray());
+                            if (objTemplate.ModelVariables.Count>0)
+                                reportParams =String.Join(",", objTemplate.ModelVariables.Select(x => x + " obj" + x).ToArray()) + ",";
 
                             if (lsTables.Count>0)
                                 listOfmethods = String.Join("\r\n", lsTables.ToArray());
+
+                            if (lsTableCalling.Count > 0)
+                                listOfmethodCalling = String.Join("\r\n", lsTableCalling.ToArray());
 
 
                             //Prepare Document
@@ -494,6 +500,9 @@ namespace PdfTemplator.PdfCore.Business.PdfModule
 
                             //Module Pramaeters
                             strDocMethod = strDocMethod.Replace(PdfTemplateManager.GetPdfDictionary()["PdfReportParams"], reportParams);
+                            //List of Table Calling Code
+                            strDocMethod = strDocMethod.Replace(PdfTemplateManager.GetPdfDictionary()["PdfReportPTableCallingList"], listOfmethodCalling);
+
                             //List of Table Code
                             strDocMethod = strDocMethod.Replace(PdfTemplateManager.GetPdfDictionary()["PdfReportPTablesList"], listOfmethods);
 
