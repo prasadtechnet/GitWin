@@ -19,7 +19,7 @@ using System.Threading.Tasks;
                /*<#PdfReportPTableCallingList>*/
                
 
-                btReport = GeneratePdf(lsPTables, ref sbLog);
+                btReport = GeneratePdf(lsPTables, ref sbLog /*<#PdfDocumentPageEvent#>*/);
             }
             catch (Exception ex)
             {
@@ -27,7 +27,7 @@ using System.Threading.Tasks;
             }
             return btReport;
         }
-        private byte[] GeneratePdf(List<PdfPTable> lsPTables, ref StringBuilder sbLog)
+        private byte[] GeneratePdf(List<PdfPTable> lsContentPTables, ref StringBuilder sbLog,iTextSharp.text.pdf.PdfPageEventHelper objPdfHandlers=null)
         {
             byte[] btPdf = null;
             try
@@ -42,11 +42,12 @@ using System.Threading.Tasks;
 
                             iTextSharp.text.pdf.PdfWriter writer = iTextSharp.text.pdf.PdfWriter.GetInstance(document, memoryStream);
 							
-							/*<#PdfDocumentPageEvent#>*/
+							if(objPdfHandlers!=null)
+							  writer.PageEvent = objPdfHandlers;
 
                             document.Open();
 
-                            foreach (PdfPTable tab1 in lsPTables)
+                            foreach (PdfPTable tab1 in lsContentPTables)
                             {
                                 document.Add(tab1);
 

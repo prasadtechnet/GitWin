@@ -105,6 +105,8 @@
     <Content Include="PdfCore\Templates\PdfHeader.txt" />
     <Content Include="PdfCore\Templates\PdfFooter.txt" />
     <Content Include="PdfCore\Templates\PdfPageEvent.txt" />
+    <Content Include="PdfCore\Templates\PdfPTableDynamc.txt" />
+    <Content Include="PdfCore\Templates\PdfPTableVariable.txt" />
     <Content Include="PdfCore\Templates\PdfTableMethod.txt" />
     <Content Include="PdfCore\Templates\ModelTemplate.txt" />
     <Content Include="PdfCore\Templates\PdfTemplate.txt" />

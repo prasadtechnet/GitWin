@@ -144,7 +144,7 @@ namespace PdfTemplator.PdfCore.Templates
             return cell;
         }
 
-        protected iTextSharp.text.pdf.PdfPCell ImageCell(string path, string SubHeading, string FontFamily, float fontSize = 10f, float scale = 50f, float Img_Height = 50f, float lbl_Height = 20f, int lbl_hAlign = iTextSharp.text.pdf.PdfCell.ALIGN_MIDDLE, int fontWeight = iTextSharp.text.Font.NORMAL, float totalWidth = 250f, float abWidth = 210, int rowSpan = 1, int colSpan = 1)
+        protected iTextSharp.text.pdf.PdfPCell ImageCell(string path, string SubHeading, string FontFamily, float fontSize = 10f, float scale = 50f, float Img_Height = 50f, float lbl_Height = 20f, int fontWeight = iTextSharp.text.Font.NORMAL, float totalWidth = 250f, float abWidth = 210, int rowSpan = 1, int colSpan = 1)
         {
 
             iTextSharp.text.pdf.PdfPTable tabSig = new iTextSharp.text.pdf.PdfPTable(1);
@@ -156,7 +156,7 @@ namespace PdfTemplator.PdfCore.Templates
                 tabSig.LockedWidth = true;
                 tabSig.SetWidths(new float[] { 1.0f });
 
-                iTextSharp.text.pdf.PdfPCell cellSig = GetStringCell(SubHeading, FontFamily, fontSize, fontWeight, iTextSharp.text.Color.BLACK, iTextSharp.text.pdf.PdfCell.ALIGN_LEFT, lbl_hAlign, lbl_Height, 5f, -1f, 4f, 4f, "", 1, 1);
+                iTextSharp.text.pdf.PdfPCell cellSig = GetStringCell(SubHeading, FontFamily, fontSize, fontWeight, iTextSharp.text.Color.BLACK, iTextSharp.text.pdf.PdfCell.ALIGN_LEFT, iTextSharp.text.pdf.PdfCell.ALIGN_MIDDLE, lbl_Height, 5f, -1f, 4f, 4f, "", 1, 1);
 
                 tabSig.AddCell(cellSig);
 
@@ -203,7 +203,7 @@ namespace PdfTemplator.PdfCore.Templates
         }
 
 
-        protected iTextSharp.text.pdf.PdfPCell ImageCell(byte[] path,string SubHeading,string FontFamily,float fontSize=10f, float scale=50f, float Img_Height=50f, float lbl_Height=20f ,int lbl_hAlign= iTextSharp.text.pdf.PdfCell.ALIGN_MIDDLE, int fontWeight= iTextSharp.text.Font.NORMAL, float totalWidth = 250f, float abWidth = 210, int rowSpan = 1, int colSpan = 1)
+        protected iTextSharp.text.pdf.PdfPCell ImageCell(byte[] path,string SubHeading,string FontFamily,float fontSize=10f, float scale=50f, float Img_Height=50f, float lbl_Height=20f , int fontWeight= iTextSharp.text.Font.NORMAL, float totalWidth = 250f, float abWidth = 210, int rowSpan = 1, int colSpan = 1)
         {
             iTextSharp.text.pdf.PdfPTable tabSig = new iTextSharp.text.pdf.PdfPTable(1);
             iTextSharp.text.pdf.PdfPCell cell = null;
@@ -214,7 +214,7 @@ namespace PdfTemplator.PdfCore.Templates
                 tabSig.LockedWidth = true;
                 tabSig.SetWidths(new float[] { 1.0f });
 
-                iTextSharp.text.pdf.PdfPCell cellSig = GetStringCell(SubHeading, FontFamily, fontSize, fontWeight, iTextSharp.text.Color.BLACK,iTextSharp.text.pdf.PdfCell.ALIGN_LEFT, lbl_hAlign, lbl_Height, 5f, -1f, 4f, 4f,"", 1, 1);
+                iTextSharp.text.pdf.PdfPCell cellSig = GetStringCell(SubHeading, FontFamily, fontSize, fontWeight, iTextSharp.text.Color.BLACK,iTextSharp.text.pdf.PdfCell.ALIGN_LEFT, iTextSharp.text.pdf.PdfCell.ALIGN_MIDDLE, lbl_Height, 5f, -1f, 4f, 4f,"", 1, 1);
 
                 tabSig.AddCell(cellSig);
 

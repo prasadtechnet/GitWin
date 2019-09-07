@@ -34,15 +34,18 @@ namespace PdfTemplator.PdfCore.Business.PdfModule
     {
         public abstract TemplateResponse ProcessTemplate(TemplateModel objTemplate);
        
-        protected string ProcessTable(TableModel objMainTab,out List<string> requiredModels)
+        protected string ProcessTable(TableModel objMainTab,List<ModelInfoModel> lsMainModelsInfo,out List<string> requiredModels)
         {
             var strRes = "";
+            var strResChild = "";
             requiredModels = new List<string>();
             try
             {
                 var objTabVarname = "obj"+objMainTab.TableName;
                 var lsModels = new List<string>();
                 var lsTableCells = new List<string>();
+
+               
 
                 foreach (var row in objMainTab.Rows)
                 {
@@ -63,19 +66,38 @@ namespace PdfTemplator.PdfCore.Business.PdfModule
                                 lsTableCells.Add(objTabVarname + ".AddCell(" + ProcessImageUrl(cell as ImageUrlCell) + ");");
                                 break;
                             case "IMAGEBYTE":
-                                lsTableCells.Add(objTabVarname + ".AddCell(" + ProcessImageByte(cell as ImageByteCell) + ");");
+                                {
+                                    lsModels.Add((cell as ImageByteCell).ModelName);
+                                    lsTableCells.Add(objTabVarname + ".AddCell(" + ProcessImageByte(cell as ImageByteCell) + ");");
+                                }
                                 break;
                             case "IMAGEURLSUB":
                                 lsTableCells.Add(objTabVarname + ".AddCell(" + ProcessImageUrlSubHeading(cell as ImageUrlSubHeaderCell) + ");");
                                 break;
                             case "IMAGEBYTESUB":
-                                lsTableCells.Add(objTabVarname + ".AddCell(" + ProcessImageByteSubHeading(cell as ImageByteSubHeaderCell) + ");");
+                                {
+                                    lsModels.Add((cell as ImageByteSubHeaderCell).ModelName);
+                                    lsTableCells.Add(objTabVarname + ".AddCell(" + ProcessImageByteSubHeading(cell as ImageByteSubHeaderCell) + ");");
+                                }
                                 break;
                             case "EMPTYCELL":
                                 lsTableCells.Add(objTabVarname + ".AddCell(" + ProcessEmpty(cell as EmptyCell) + ");");
                                 break;
-                            case "TABLECELL":                                
-                                 lsTableCells.Add(objTabVarname + ".AddCell(" + ProcessTableCell(cell as TableCell) + ");");                                
+                            case "TABLECELL":
+                                {
+                                    var lsChildModels = new List<string>();
+                                    var lsTabRes = ProcessTableCell(cell as TableCell,lsMainModelsInfo,out lsChildModels);
+                                    if (lsChildModels != null && lsChildModels.Count > 0)
+                                        lsModels.AddRange(lsChildModels);
+
+                                    if (lsTabRes != null && lsTabRes.Count > 0)
+                                    {
+                                        lsTableCells.Add(lsTabRes[1]);
+                                        lsTableCells.Add(objTabVarname + ".AddCell(" + lsTabRes[0] + ");");
+
+                                        strResChild = strResChild+ lsTabRes[2]+"\r\n";
+                                    }
+                                }
                                 break;
                         }
                     }
@@ -83,9 +105,18 @@ namespace PdfTemplator.PdfCore.Business.PdfModule
 
                 var strCells = String.Join("\r\n", lsTableCells.ToArray());
                 var strDictModels = "";
+
                 if (lsModels != null && lsModels.Count > 0)
                 {
-                    strDictModels = string.Join(",", lsModels.Distinct().Select(x => x + " obj" + x).ToArray()) + ",";
+                    lsModels = lsModels.Distinct().ToList();
+                    var localParams = new List<string>();
+                    foreach (var item in lsModels)
+                    {
+                        localParams.Add(lsMainModelsInfo.Find(x => x.ModelName == item).ModelType == "L" ? "List<"+ item + "> ls" + item : item+ " obj" + item);
+                    }
+                    strDictModels = string.Join(",", localParams.ToArray()) + ",";
+                    //  strDictModels = string.Join(",", lsModels.Distinct().Select(x => x + " obj" + x).ToArray()) + ",";
+                    //strDictModels = string.Join(",", lsModels.Distinct().Select(x => x + " obj" + x).ToArray()) + ",";
                     requiredModels = lsModels.Distinct().ToList();
                 }
                 var strTab = PdfTemplateManager.GetFileContent(TemplatePhysicalFile.TableMethod);
@@ -98,6 +129,205 @@ namespace PdfTemplator.PdfCore.Business.PdfModule
                 strTab = strTab.Replace(PdfTemplateManager.GetPdfDictionary()["TableColumnWidths"],String.Join(",",objMainTab.Colwidth.Select(x=>x.ToString()+"f").ToArray()));
                 strTab = strTab.Replace(PdfTemplateManager.GetPdfDictionary()["TableCells"], strCells);
 
+                strRes = strTab+"\r\n" +( strResChild!=""? strResChild:"");
+
+            }
+            catch (Exception ex)
+            {
+            }
+            return strRes;
+        }
+        protected string ProcessDynamicTable(TableModel objMainTab, List<ModelInfoModel> lsMainModelsInfo, out List<string> requiredModels)
+        {
+            var strRes = "";
+            var strResChild = "";
+            requiredModels = new List<string>();
+            try
+            {
+                var objTabVarname = "obj" + objMainTab.TableName;
+                var lsModels = new List<string>();
+                var lsTableHeaderCells = new List<string>();
+                var lsTableCells = new List<string>();
+
+                if (objMainTab.isDynamicTab && objMainTab.HeaderRows.Count > 0)
+                {
+                    foreach (var row in objMainTab.HeaderRows)
+                    {
+                        foreach (var cell in row.Cells)
+                        {
+                            if (cell.ContentType.ToUpper() == "LABEL")
+                            {
+                                lsTableHeaderCells.Add(objTabVarname + ".AddCell(" + ProcessLabel(cell as LabelCell) + ");");
+                            }
+                        }
+                    }
+                }
+
+                foreach (var row in objMainTab.Rows)
+                {
+                    foreach (var cell in row.Cells)
+                    {
+                        switch (cell.ContentType.ToUpper())
+                        {
+                            case "LABEL":
+                                lsTableCells.Add(objTabVarname + ".AddCell(" + ProcessLabel(cell as LabelCell) + ");");
+                                break;
+                            case "FIELD":
+                                {
+                                    lsModels.Add((cell as FieldCell).ModelName);
+                                    lsTableCells.Add(objTabVarname + ".AddCell(" + ProcessField(cell as FieldCell) + ");");
+                                }
+                                break;
+                            //case "IMAGEURL":
+                            //    lsTableCells.Add(objTabVarname + ".AddCell(" + ProcessImageUrl(cell as ImageUrlCell) + ");");
+                            //    break;
+                            //case "IMAGEBYTE":
+                            //    {
+                            //        lsModels.Add((cell as ImageByteCell).ModelName);
+                            //        lsTableCells.Add(objTabVarname + ".AddCell(" + ProcessImageByte(cell as ImageByteCell) + ");");
+                            //    }
+                            //    break;
+                            //case "IMAGEURLSUB":
+                            //    lsTableCells.Add(objTabVarname + ".AddCell(" + ProcessImageUrlSubHeading(cell as ImageUrlSubHeaderCell) + ");");
+                            //    break;
+                            //case "IMAGEBYTESUB":
+                            //    {
+                            //        lsModels.Add((cell as ImageByteSubHeaderCell).ModelName);
+                            //        lsTableCells.Add(objTabVarname + ".AddCell(" + ProcessImageByteSubHeading(cell as ImageByteSubHeaderCell) + ");");
+                            //    }
+                            //    break;
+                            //case "EMPTYCELL":
+                            //    lsTableCells.Add(objTabVarname + ".AddCell(" + ProcessEmpty(cell as EmptyCell) + ");");
+                            //    break;
+                            //case "TABLECELL":
+                            //    {
+                            //        var lsChildModels = new List<string>();
+                            //        var lsTabRes = ProcessTableCell(cell as TableCell, out lsChildModels);
+                            //        if (lsChildModels != null && lsChildModels.Count > 0)
+                            //            lsModels.AddRange(lsChildModels);
+
+                            //        if (lsTabRes != null && lsTabRes.Count > 0)
+                            //        {
+                            //            lsTableCells.Add(lsTabRes[1]);
+                            //            lsTableCells.Add(objTabVarname + ".AddCell(" + lsTabRes[0] + ");");
+
+                            //            strResChild = strResChild + lsTabRes[2] + "\r\n";
+                            //        }
+                            //    }
+                            //    break;
+                        }
+                    }
+                }
+
+
+                var strCells = String.Join("\r\n", lsTableHeaderCells.ToArray());
+                var temp = String.Join("\r\n", lsTableCells.ToArray());
+                strCells = strCells + "\r\n #region Items \r\nfor(intChild=0;intChild<ls"+ lsModels[0]+".Count;intChild++)\r\n{\r\n "+ temp + "  \r\n}\r\n#endregion\r\n";
+
+                var strDictModels = "";
+                if (lsModels != null && lsModels.Count > 0)
+                {
+                    lsModels = lsModels.Distinct().ToList();
+                    var localParams = new List<string>();
+                    foreach (var item in lsModels)
+                    {
+                        localParams.Add(lsMainModelsInfo.Find(x => x.ModelName == item).ModelType == "L" ? "List<" + item + "> ls" + item : item + " obj" + item);
+                    }
+                    strDictModels = string.Join(",", localParams.ToArray()) + ",";
+                  //  strDictModels = string.Join(",", lsModels.Distinct().Select(x => x + " obj" + x).ToArray()) + ",";
+                    requiredModels = lsModels.Distinct().ToList();
+                }
+                var strTab = PdfTemplateManager.GetFileContent(TemplatePhysicalFile.TableMethod);
+
+                strTab = strTab.Replace(PdfTemplateManager.GetPdfDictionary()["TableMethodName"], objMainTab.TableName + "Method");
+                strTab = strTab.Replace(PdfTemplateManager.GetPdfDictionary()["TableVariableName"], objTabVarname);
+                strTab = strTab.Replace(PdfTemplateManager.GetPdfDictionary()["TableMethodParams"], strDictModels);
+                strTab = strTab.Replace(PdfTemplateManager.GetPdfDictionary()["TableColumnNo"], objMainTab.noofClmns.ToString());
+                strTab = strTab.Replace(PdfTemplateManager.GetPdfDictionary()["TableWidth"], objMainTab.width.ToString() + "f");
+                strTab = strTab.Replace(PdfTemplateManager.GetPdfDictionary()["TableColumnWidths"], String.Join(",", objMainTab.Colwidth.Select(x => x.ToString() + "f").ToArray()));
+                strTab = strTab.Replace(PdfTemplateManager.GetPdfDictionary()["TableCells"], strCells);
+
+                strRes = strTab ;
+
+            }
+            catch (Exception ex)
+            {
+            }
+            return strRes;
+        }
+
+        private string ProcessTableVariable(TableModel objMainTab, out List<string> requiredModels)
+        {
+            var strRes = "";
+            requiredModels = new List<string>();
+            try
+            {
+                var objTabVarname = "obj" + objMainTab.TableName;
+                var lsModels = new List<string>();
+                var lsTableCells = new List<string>();
+
+                foreach (var row in objMainTab.Rows)
+                {
+                    foreach (var cell in row.Cells)
+                    {
+                        switch (cell.ContentType.ToUpper())
+                        {
+                            case "LABEL":
+                                lsTableCells.Add(objTabVarname + ".AddCell(" + ProcessLabel(cell as LabelCell) + ");");
+                                break;
+                            case "FIELD":
+                                {
+                                    lsModels.Add((cell as FieldCell).ModelName);
+                                    lsTableCells.Add(objTabVarname + ".AddCell(" + ProcessField(cell as FieldCell) + ");");
+                                }
+                                break;
+                            case "IMAGEURL":
+                                lsTableCells.Add(objTabVarname + ".AddCell(" + ProcessImageUrl(cell as ImageUrlCell) + ");");
+                                break;
+                            case "IMAGEBYTE":
+                                {
+                                    lsModels.Add((cell as ImageByteCell).ModelName);
+                                    lsTableCells.Add(objTabVarname + ".AddCell(" + ProcessImageByte(cell as ImageByteCell) + ");");
+                                }
+                                break;
+                            case "IMAGEURLSUB":
+                                lsTableCells.Add(objTabVarname + ".AddCell(" + ProcessImageUrlSubHeading(cell as ImageUrlSubHeaderCell) + ");");
+                                break;
+                            case "IMAGEBYTESUB":
+                                {
+                                    lsModels.Add((cell as ImageByteSubHeaderCell).ModelName);
+                                    lsTableCells.Add(objTabVarname + ".AddCell(" + ProcessImageByteSubHeading(cell as ImageByteSubHeaderCell) + ");");
+                                }
+                                break;
+                            case "EMPTYCELL":
+                                lsTableCells.Add(objTabVarname + ".AddCell(" + ProcessEmpty(cell as EmptyCell) + ");");
+                                break;
+                            case "TABLECELL":
+                                {
+                                   // var lsTabRes = ProcessTableCell(cell as TableCell);
+                                    //  lsTableCells.Add(objTabVarname + ".AddCell(" + ProcessTableCell(cell as TableCell) + ");");
+                                }
+                                break;
+                        }
+                    }
+                }
+
+                var strCells = String.Join("\r\n", lsTableCells.ToArray());
+                var strDictModels = "";
+                if (lsModels != null && lsModels.Count > 0)
+                {
+                    strDictModels = string.Join(",", lsModels.Distinct().Select(x => x + " obj" + x).ToArray()) + ",";
+                    requiredModels = lsModels.Distinct().ToList();
+                }
+                var strTab = PdfTemplateManager.GetFileContent(TemplatePhysicalFile.TableVariable);
+
+               
+                strTab = strTab.Replace(PdfTemplateManager.GetPdfDictionary()["TableVariableName"], objTabVarname);       
+                strTab = strTab.Replace(PdfTemplateManager.GetPdfDictionary()["TableColumnNo"], objMainTab.noofClmns.ToString());
+                strTab = strTab.Replace(PdfTemplateManager.GetPdfDictionary()["TableWidth"], objMainTab.width.ToString() + "f");
+                strTab = strTab.Replace(PdfTemplateManager.GetPdfDictionary()["TableColumnWidths"], String.Join(",", objMainTab.Colwidth.Select(x => x.ToString() + "f").ToArray()));
+                strTab = strTab.Replace(PdfTemplateManager.GetPdfDictionary()["TableCells"], strCells);
+
                 strRes = strTab;
 
             }
@@ -106,17 +336,51 @@ namespace PdfTemplator.PdfCore.Business.PdfModule
             }
             return strRes;
         }
-        private string ProcessTableCell(TableCell objTabChild)
+        private List<string> ProcessTableCell(TableCell objTabChild,List<ModelInfoModel> lsMainModelInfo,out List<string> lsMethodModel)
         {
-            var strRes = "";
+            var lsRes = new List<string>();
+            lsMethodModel = new List<string>();
             try
             {
+                var lsModels = new List<string>();
+                var tabVarData = "";
+                var tabVarMethod = "";
+                if (objTabChild.tableModel.isSeparateMethod)
+                {
+                    tabVarMethod = ProcessTable(objTabChild.tableModel, lsMainModelInfo, out lsModels);
+                    var strParams = "";
+                    if (lsModels.Count > 0)
+                        strParams = string.Join(",", lsModels.Select(x => "obj" + x).ToArray()) + ",";
+                    // strParams = string.Join(",", lsPdfTableModelInputs.Select(x => x + " obj" + x).ToArray())+",";
+                    lsMethodModel = lsModels;
+                    tabVarData = "var obj" + objTabChild.tableModel.TableName+"=" + objTabChild.tableModel.TableName + "Method(" + strParams + " ref sbLog));";
+                }
+                else
+                {
+                    tabVarData = ProcessTableVariable(objTabChild.tableModel, out lsModels);
+                    lsMethodModel = lsModels;
+                }
+
+              
+                //iTextSharp.text.pdf.PdfPTable table, int hAlign, int vAlign= iTextSharp.text.pdf.PdfPCell.ALIGN_TOP, iTextSharp.text.Color borderColor=null
+                var strRes = String.Format(PdfTemplateManager.GetCellCallString("TABLECELL"), new object[] {
+                    "obj"+objTabChild.tableModel.TableName,
+                    GetAlignment(objTabChild.HAlign),
+                    GetAlignment(objTabChild.VAlign),
+                    "null"
+                });
+
+             
+                //2.Child table cell phrase
+                lsRes.Add(strRes);
+                lsRes.Add(tabVarData);
+                lsRes.Add(tabVarMethod);
 
             }
             catch (Exception ex)
             {
             }
-            return strRes;
+            return lsRes;
         }
         private string ProcessLabel(LabelCell objLabel)
         {
@@ -157,7 +421,7 @@ namespace PdfTemplator.PdfCore.Business.PdfModule
             {
                 strRes= String.Format(PdfTemplateManager.GetCellCallString("EMPTYCELL"), new object[] {
                     "\"\"",
-                   "Arial",
+                   "\"Arial\"",
                     "10f",
                     GetFontWeight(0),
                     GetColor(new ColorModel{Type="PDF",pdfColor=iTextSharp.text.Color.BLACK }),
@@ -185,7 +449,7 @@ namespace PdfTemplator.PdfCore.Business.PdfModule
             try
             {
                 strRes = String.Format(PdfTemplateManager.GetCellCallString("FIELDCELL"), new object[] {
-                   "obj"+objField.ModelName+"."+objField.DataFieldName,
+                  (objField.IsDynamicField?  "ls"+objField.ModelName +"[intChild]." +objField.DataFieldName: "obj"+objField.ModelName +"." +objField.DataFieldName),
                     "\""+objField.Font.FontFamily+"\"",
                     objField.Font.FontSize+"f",
                     GetFontWeight(objField.Font.FontWeight),
@@ -213,9 +477,23 @@ namespace PdfTemplator.PdfCore.Business.PdfModule
             var strRes = "";
             try
             {
+                ////string path, float scale, float height, int hAlign,
+                ///int vAlign= iTextSharp.text.pdf.PdfPCell.ALIGN_TOP, float p_left=0f, float p_right = 0f, float p_top = 0f, float p_btm = 0f, string borderPattren="T,R,B")
+                strRes = String.Format(PdfTemplateManager.GetCellCallString("IMAGEURLCELL"), new object[] {
+                   "\""+ objImage.Src+"\"",
+                    objImage.Scale+"f",
+                    objImage.Height+"f",
+                    GetAlignment(objImage.HAlign),
+                     GetAlignment(objImage.VAlign),
+                    objImage.PLeft+"f",
+                    objImage.PRight+"f",
+                    objImage.PTop+"f",
+                    objImage.PBottom+"f",
+                    "\""+objImage.BorderPattren+"\""
+                });
 
             }
-            catch (Exception ex)
+            catch (Exception EX)
             {
             }
             return strRes;
@@ -225,7 +503,14 @@ namespace PdfTemplator.PdfCore.Business.PdfModule
             var strRes = "";
             try
             {
-
+                //byte[] path, float scale, int hAlign, int vAlign = iTextSharp.text.pdf.PdfPCell.ALIGN_TOP, iTextSharp.text.Color backColor = null
+                strRes = String.Format(PdfTemplateManager.GetCellCallString("IMAGEBYTECELL"), new object[] {
+                    "obj"+objImage.ModelName+"."+objImage.ImageFieldName,
+                    objImage.Scale+"f",
+                   GetAlignment(objImage.HAlign),
+                   GetAlignment( objImage.VAlign),
+                    "null"
+                });
             }
             catch (Exception ex)
             {
@@ -237,7 +522,22 @@ namespace PdfTemplator.PdfCore.Business.PdfModule
             var strRes = "";
             try
             {
-
+                ///string path, string SubHeading, string FontFamily, float fontSize = 10f, float scale = 50f, float Img_Height = 50f, float lbl_Height = 20f, 
+                ///int fontWeight = iTextSharp.text.Font.NORMAL, float totalWidth = 250f,float abWidth = 210, int rowSpan = 1, int colSpan = 1
+                strRes = String.Format(PdfTemplateManager.GetCellCallString("IMAGEURLSUBCELL"), new object[] {
+                    "\""+ objImage.Src+"\"",
+                      "\""+ objImage.label.Text+"\"",
+                    "\""+ objImage.label.Font.FontFamily+"\"",
+                     objImage.label.Font.FontSize+"f",
+                     objImage.Sclae+"f",
+                     objImage.Height+"f",
+                     objImage.label.Height+"f",
+                     GetFontWeight(objImage.label.Font.FontWeight),
+                     objImage.TableTotalWidth+"f",
+                     objImage.AbWidth+"f",
+                     objImage.RowSpan,
+                     objImage.ColSpan
+                });
             }
             catch (Exception ex)
             {
@@ -249,7 +549,24 @@ namespace PdfTemplator.PdfCore.Business.PdfModule
             var strRes = "";
             try
             {
+                ///byte[] path,string SubHeading,string FontFamily,float fontSize=10f, float scale=50f,
+                ///float Img_Height=50f, float lbl_Height=20f , int fontWeight= iTextSharp.text.Font.NORMAL,
+                ///float totalWidth = 250f, float abWidth = 210, int rowSpan = 1, int colSpan = 1
 
+                strRes = String.Format(PdfTemplateManager.GetCellCallString("IMAGEBYTESUBCELL"), new object[] {
+                    "obj"+objImage.ModelName+"."+objImage.ImageFieldName,
+                      "\""+ objImage.label.Text+"\"",
+                    "\""+ objImage.label.Font.FontFamily+"\"",
+                     objImage.label.Font.FontSize+"f",
+                     objImage.Scale+"f",
+                     objImage.Height+"f",
+                     objImage.label.Height+"f",
+                     GetFontWeight(objImage.label.Font.FontWeight),
+                     objImage.TableTotalWidth+"f",
+                     objImage.AbWidth+"f",
+                     objImage.RowSpan,
+                     objImage.ColSpan
+                });
             }
             catch (Exception ex)
             {
@@ -257,7 +574,7 @@ namespace PdfTemplator.PdfCore.Business.PdfModule
             return strRes;
         }
 
-        protected string ProcessModelGeneration(List<string> lsModelName, List<BindingModel> lsProps,string Namespace)
+        protected string ProcessModelGeneration(List<ModelInfoModel> lsModelName, List<BindingModel> lsProps,string Namespace)
         {
             var strRes = "";
             try
@@ -271,7 +588,7 @@ namespace PdfTemplator.PdfCore.Business.PdfModule
                     var lsModels = new List<string>();
                     foreach (var model in lsModelName)
                     {
-                        var modelProps = lsProps.Where(x => x.ModelVariable == model).ToList();
+                        var modelProps = lsProps.Where(x => x.ModelVariable == model.ModelName).ToList();
                         if (modelProps.Count > 0)
                         {
 
@@ -279,7 +596,7 @@ namespace PdfTemplator.PdfCore.Business.PdfModule
                             {
                                 var lsPropModel = String.Join("\r\n", modelProps.Select(x => propTemplate.Replace("<#ModelProps#>", x.PropName)).ToArray());
 
-                                modelTemplate = modelTemplate.Replace("<#ModelClassName#>", model);
+                                modelTemplate = modelTemplate.Replace("<#ModelClassName#>", model.ModelName);
                                 modelTemplate = modelTemplate.Replace("<#ModelClassProps#>", lsPropModel);
                                 lsModels.Add(modelTemplate);
                             }
@@ -385,83 +702,21 @@ namespace PdfTemplator.PdfCore.Business.PdfModule
     }
     public class HCF : PdfTemplate
     {
-      
-
-        public override TemplateResponse ProcessTemplate(TemplateModel objTemplate)
-        {
-            var resp = new TemplateResponse();
-            try
-            {
-
-            }
-            catch (Exception ex)
-            {
-                resp.Message = "Exception:"+ex.Message;
-            }
-            return resp;
-        }
-    }
-    public class HC : PdfTemplate
-    {
-      
-        public override TemplateResponse ProcessTemplate(TemplateModel objTemplate)
-        {
-            var resp = new TemplateResponse();
-            try
-            {
-
-            }
-            catch (Exception ex)
-            {
-                resp.Message = "Exception:" + ex.Message;
-            }
-            return resp;
-        }
-    }
-    public class CF : PdfTemplate
-    {
         public override TemplateResponse ProcessTemplate(TemplateModel objTemplate)
         {
 
             try
             {
-                var objInput = objTemplate as C_TemplateModel;
+                var objInput = objTemplate as HCF_TemplateModel;
                 if (objInput.Name != "" && objInput.NameSpace != "")
                 {
                     if (objInput.Body != null)
                     {
                         if (objInput.Body.Tables.Count > 0)
                         {
-                            List<string> lsTables = new List<string>();
-                            List<string> lsTableCalling = new List<string>();
-                            List<string> lsPdfTableModelInputs = new List<string>();
-                            var strParams = "";
-                            foreach (var tab in objInput.Body.Tables)
-                            {
-                                lsPdfTableModelInputs = new List<string>();
-                                strParams = "";
+                       
 
-                                lsTables.Add(ProcessTable(tab, out lsPdfTableModelInputs));
-
-                                if (lsPdfTableModelInputs.Count > 0)
-                                    strParams = string.Join(",", lsPdfTableModelInputs.Select(x => "obj" + x).ToArray()) + ",";
-                                // strParams = string.Join(",", lsPdfTableModelInputs.Select(x => x + " obj" + x).ToArray())+",";
-
-                                lsTableCalling.Add("lsPTables.Add(" + tab.TableName + "Method(" + strParams + " ref sbLog));");
-                            }
-
-                            var reportParams = "";
-                            var listOfmethods = "";
-                            var listOfmethodCalling = "";
-
-                            if (objTemplate.ModelVariables.Count > 0)
-                                reportParams = String.Join(",", objTemplate.ModelVariables.Select(x => x + " obj" + x).ToArray()) + ",";
-
-                            if (lsTables.Count > 0)
-                                listOfmethods = String.Join("\r\n", lsTables.ToArray());
-
-                            if (lsTableCalling.Count > 0)
-                                listOfmethodCalling = String.Join("\r\n", lsTableCalling.ToArray());
+                            var lsBody = GetBodyContent(objInput);
 
 
                             //Prepare Document
@@ -481,12 +736,12 @@ namespace PdfTemplator.PdfCore.Business.PdfModule
 
 
                             //Module Pramaeters
-                            strDocMethod = strDocMethod.Replace(PdfTemplateManager.GetPdfDictionary()["PdfReportParams"], reportParams);
+                            strDocMethod = strDocMethod.Replace(PdfTemplateManager.GetPdfDictionary()["PdfReportParams"], lsBody[0]);
                             //List of Table Calling Code
-                            strDocMethod = strDocMethod.Replace(PdfTemplateManager.GetPdfDictionary()["PdfReportPTableCallingList"], listOfmethodCalling);
+                            strDocMethod = strDocMethod.Replace(PdfTemplateManager.GetPdfDictionary()["PdfReportPTableCallingList"], lsBody[2]);
 
                             //List of Table Code
-                            strDocMethod = strDocMethod.Replace(PdfTemplateManager.GetPdfDictionary()["PdfReportPTablesList"], listOfmethods);
+                            strDocMethod = strDocMethod.Replace(PdfTemplateManager.GetPdfDictionary()["PdfReportPTablesList"], lsBody[1]);
 
 
 
@@ -528,9 +783,391 @@ namespace PdfTemplator.PdfCore.Business.PdfModule
             return null;
         }
 
-        private List<string> GetFooterInfo(TemplateModel objTemplate)
+
+        private List<string> GetBodyContent(HCF_TemplateModel objInput)
+        {
+            List<string> lsResult = null;
+            try
+            {
+
+                List<string> lsTables = new List<string>();
+                List<string> lsTableCalling = new List<string>();
+                List<string> lsPdfTableModelInputs = new List<string>();
+                var strParams = "";
+                foreach (var tab in objInput.Body.Tables)
+                {
+                    lsPdfTableModelInputs = new List<string>();
+                    strParams = "";
+                    if (tab.isDynamicTab)
+                        lsTables.Add(ProcessDynamicTable(tab, objInput.ModelVariables, out lsPdfTableModelInputs));
+                    else
+                        lsTables.Add(ProcessTable(tab, objInput.ModelVariables, out lsPdfTableModelInputs));
+
+                    if (lsPdfTableModelInputs.Count > 0)
+                    {
+                        var localParams = new List<string>();
+                        foreach (var item in lsPdfTableModelInputs)
+                        {
+                            localParams.Add(objInput.ModelVariables.Find(x => x.ModelName == item).ModelType == "L" ? "ls" + item : "obj" + item);
+
+
+                        }
+                        strParams = string.Join(",", localParams.ToArray()) + ",";
+                    }
+
+                    // strParams = string.Join(",", lsPdfTableModelInputs.Select(x => x + " obj" + x).ToArray())+",";
+
+                    lsTableCalling.Add("lsPTables.Add(" + tab.TableName + "Method(" + strParams + " ref sbLog));");
+                }
+
+
+                lsResult = new List<string>();
+                if (objInput.ModelVariables.Count > 0)
+                {
+                    var xt = String.Join(",", objInput.ModelVariables.Where(y => y.ModelType == "N").Select(x => x.ModelName + " obj" + x.ModelName).ToArray());
+                    if (objInput.ModelVariables.Where(y => y.ModelType == "L").Count() > 0)
+                        xt = xt + (xt != "" ? "," : "") + String.Join(",", objInput.ModelVariables.Where(y => y.ModelType == "L").Select(x => "List<" + x.ModelName + "> ls" + x.ModelName).ToArray());
+                    lsResult.Add(xt + ",");
+                }
+
+                else
+                    lsResult.Add("");
+
+                if (lsTables.Count > 0)
+                    lsResult.Add(String.Join("\r\n", lsTables.ToArray()));
+                else
+                    lsResult.Add("");
+
+                if (lsTableCalling.Count > 0)
+                    lsResult.Add(String.Join("\r\n", lsTableCalling.ToArray()));
+                else
+                    lsResult.Add("");
+
+            }
+            catch (Exception ex)
+            {
+            }
+
+            return lsResult;
+        }
+    }
+    public class HC : PdfTemplate
+    {
+
+        public override TemplateResponse ProcessTemplate(TemplateModel objTemplate)
         {
 
+            try
+            {
+                var objInput = objTemplate as HC_TemplateModel;
+                if (objInput.Name != "" && objInput.NameSpace != "")
+                {
+                    if (objInput.Body != null)
+                    {
+                        if (objInput.Body.Tables.Count > 0)
+                        {
+                         
+
+                            var lsBody = GetBodyContent(objInput);
+
+
+                            //Prepare Document
+                            var strDocMethod = PdfTemplateManager.GetFileContent(TemplatePhysicalFile.Template);
+                            var strCoreMethods = PdfTemplateManager.GetFileContent(TemplatePhysicalFile.PdfCore);
+
+                            //Page Events
+                            strDocMethod = strDocMethod.Replace(PdfTemplateManager.GetPdfDictionary()["DocumentPageEvent"], "");
+                            strDocMethod = strDocMethod.Replace(PdfTemplateManager.GetPdfDictionary()["PdfDocumentPageEventClass"], "");
+                            //Namespace
+                            strDocMethod = strDocMethod.Replace(PdfTemplateManager.GetPdfDictionary()["ModuleNameSpace"], objTemplate.NameSpace);
+                            //Module Name
+                            strDocMethod = strDocMethod.Replace(PdfTemplateManager.GetPdfDictionary()["ModuleName"], objTemplate.Name);
+                            //Core Abstract 
+                            strDocMethod = strDocMethod.Replace(PdfTemplateManager.GetPdfDictionary()["PdfCoreClass"], strCoreMethods);
+
+
+
+                            //Module Pramaeters
+                            strDocMethod = strDocMethod.Replace(PdfTemplateManager.GetPdfDictionary()["PdfReportParams"], lsBody[0]);
+                            //List of Table Calling Code
+                            strDocMethod = strDocMethod.Replace(PdfTemplateManager.GetPdfDictionary()["PdfReportPTableCallingList"], lsBody[2]);
+
+                            //List of Table Code
+                            strDocMethod = strDocMethod.Replace(PdfTemplateManager.GetPdfDictionary()["PdfReportPTablesList"], lsBody[1]);
+
+
+
+                            //Model
+                            var strModelFileContent = "";
+                            if (objTemplate.ModelVariables.Count > 0)
+                                strModelFileContent = ProcessModelGeneration(objTemplate.ModelVariables, objTemplate.bindingModelProps, objTemplate.NameSpace);
+
+
+
+                            var objResp = new TemplateResponse();
+                            //Template File 
+                            objResp.PdfTemplateFileName = objTemplate.Name + ".cs";
+                            objResp.PdfTemplateFileContent = strDocMethod;
+
+                            //Model File
+                            objResp.PdfModelsFileName = objTemplate.Name + "Models.cs";
+                            objResp.PdfModelsFileContent = strModelFileContent;
+
+                            objResp.Status = true;
+
+                            return objResp;
+                        }
+                    }
+                    else
+                        return new TemplateResponse { Status = false, Message = "Invalid Name / Namespace" };
+                }
+                else
+                    return new TemplateResponse { Status = false, Message = "Invalid Name / Namespace" };
+
+
+            }
+            catch (Exception ex)
+            {
+
+                return new TemplateResponse { Status = false, Message = "Exception:" + ex.Message };
+
+            }
+            return null;
+        }
+
+
+        private List<string> GetBodyContent(HC_TemplateModel objInput)
+        {
+            List<string> lsResult = null;
+            try
+            {
+
+                List<string> lsTables = new List<string>();
+                List<string> lsTableCalling = new List<string>();
+                List<string> lsPdfTableModelInputs = new List<string>();
+                var strParams = "";
+                foreach (var tab in objInput.Body.Tables)
+                {
+                    lsPdfTableModelInputs = new List<string>();
+                    strParams = "";
+                    if (tab.isDynamicTab)
+                        lsTables.Add(ProcessDynamicTable(tab, objInput.ModelVariables, out lsPdfTableModelInputs));
+                    else
+                        lsTables.Add(ProcessTable(tab, objInput.ModelVariables, out lsPdfTableModelInputs));
+
+                    if (lsPdfTableModelInputs.Count > 0)
+                    {
+                        var localParams = new List<string>();
+                        foreach (var item in lsPdfTableModelInputs)
+                        {
+                            localParams.Add(objInput.ModelVariables.Find(x => x.ModelName == item).ModelType == "L" ? "ls" + item : "obj" + item);
+
+
+                        }
+                        strParams = string.Join(",", localParams.ToArray()) + ",";
+                    }
+
+                    // strParams = string.Join(",", lsPdfTableModelInputs.Select(x => x + " obj" + x).ToArray())+",";
+
+                    lsTableCalling.Add("lsPTables.Add(" + tab.TableName + "Method(" + strParams + " ref sbLog));");
+                }
+
+
+                lsResult = new List<string>();
+                if (objInput.ModelVariables.Count > 0)
+                {
+                    var xt = String.Join(",", objInput.ModelVariables.Where(y => y.ModelType == "N").Select(x => x.ModelName + " obj" + x.ModelName).ToArray());
+                    if (objInput.ModelVariables.Where(y => y.ModelType == "L").Count() > 0)
+                        xt = xt + (xt != "" ? "," : "") + String.Join(",", objInput.ModelVariables.Where(y => y.ModelType == "L").Select(x => "List<" + x.ModelName + "> ls" + x.ModelName).ToArray());
+                    lsResult.Add(xt + ",");
+                }
+
+                else
+                    lsResult.Add("");
+
+                if (lsTables.Count > 0)
+                    lsResult.Add(String.Join("\r\n", lsTables.ToArray()));
+                else
+                    lsResult.Add("");
+
+                if (lsTableCalling.Count > 0)
+                    lsResult.Add(String.Join("\r\n", lsTableCalling.ToArray()));
+                else
+                    lsResult.Add("");
+
+            }
+            catch (Exception ex)
+            {
+            }
+
+            return lsResult;
+        }
+    }
+    public class CF : PdfTemplate
+    {
+        public override TemplateResponse ProcessTemplate(TemplateModel objTemplate)
+        {
+
+            try
+            {
+                var objInput = objTemplate as CF_TemplateModel;
+                if (objInput.Name != "" && objInput.NameSpace != "")
+                {
+                    if (objInput.Body != null)
+                    {
+                        if (objInput.Body.Tables.Count > 0)
+                        {
+                         
+
+                            var lsBody = GetBodyContent(objInput);
+
+
+                            //Prepare Document
+                            var strDocMethod = PdfTemplateManager.GetFileContent(TemplatePhysicalFile.Template);
+                            var strCoreMethods = PdfTemplateManager.GetFileContent(TemplatePhysicalFile.PdfCore);
+
+                            //Page Events
+                            strDocMethod = strDocMethod.Replace(PdfTemplateManager.GetPdfDictionary()["DocumentPageEvent"], "");
+                            strDocMethod = strDocMethod.Replace(PdfTemplateManager.GetPdfDictionary()["PdfDocumentPageEventClass"], "");
+                            //Namespace
+                            strDocMethod = strDocMethod.Replace(PdfTemplateManager.GetPdfDictionary()["ModuleNameSpace"], objTemplate.NameSpace);
+                            //Module Name
+                            strDocMethod = strDocMethod.Replace(PdfTemplateManager.GetPdfDictionary()["ModuleName"], objTemplate.Name);
+                            //Core Abstract 
+                            strDocMethod = strDocMethod.Replace(PdfTemplateManager.GetPdfDictionary()["PdfCoreClass"], strCoreMethods);
+
+
+
+                            //Module Pramaeters
+                            strDocMethod = strDocMethod.Replace(PdfTemplateManager.GetPdfDictionary()["PdfReportParams"], lsBody[0]);
+                            //List of Table Calling Code
+                            strDocMethod = strDocMethod.Replace(PdfTemplateManager.GetPdfDictionary()["PdfReportPTableCallingList"], lsBody[2]);
+
+                            //List of Table Code
+                            strDocMethod = strDocMethod.Replace(PdfTemplateManager.GetPdfDictionary()["PdfReportPTablesList"], lsBody[1]);
+
+
+
+                            //Model
+                            var strModelFileContent = "";
+                            if (objTemplate.ModelVariables.Count > 0)
+                                strModelFileContent = ProcessModelGeneration(objTemplate.ModelVariables, objTemplate.bindingModelProps, objTemplate.NameSpace);
+
+
+
+                            var objResp = new TemplateResponse();
+                            //Template File 
+                            objResp.PdfTemplateFileName = objTemplate.Name + ".cs";
+                            objResp.PdfTemplateFileContent = strDocMethod;
+
+                            //Model File
+                            objResp.PdfModelsFileName = objTemplate.Name + "Models.cs";
+                            objResp.PdfModelsFileContent = strModelFileContent;
+
+                            objResp.Status = true;
+
+                            return objResp;
+                        }
+                    }
+                    else
+                        return new TemplateResponse { Status = false, Message = "Invalid Name / Namespace" };
+                }
+                else
+                    return new TemplateResponse { Status = false, Message = "Invalid Name / Namespace" };
+
+
+            }
+            catch (Exception ex)
+            {
+
+                return new TemplateResponse { Status = false, Message = "Exception:" + ex.Message };
+
+            }
+            return null;
+        }
+
+
+        private List<string> GetBodyContent(CF_TemplateModel objInput)
+        {
+            List<string> lsResult = null;
+            try
+            {
+
+                List<string> lsTables = new List<string>();
+                List<string> lsTableCalling = new List<string>();
+                List<string> lsPdfTableModelInputs = new List<string>();
+                var strParams = "";
+                foreach (var tab in objInput.Body.Tables)
+                {
+                    lsPdfTableModelInputs = new List<string>();
+                    strParams = "";
+                    if (tab.isDynamicTab)
+                        lsTables.Add(ProcessDynamicTable(tab, objInput.ModelVariables, out lsPdfTableModelInputs));
+                    else
+                        lsTables.Add(ProcessTable(tab, objInput.ModelVariables, out lsPdfTableModelInputs));
+
+                    if (lsPdfTableModelInputs.Count > 0)
+                    {
+                        var localParams = new List<string>();
+                        foreach (var item in lsPdfTableModelInputs)
+                        {
+                            localParams.Add(objInput.ModelVariables.Find(x => x.ModelName == item).ModelType == "L" ? "ls" + item : "obj" + item);
+
+
+                        }
+                        strParams = string.Join(",", localParams.ToArray()) + ",";
+                    }
+
+                    // strParams = string.Join(",", lsPdfTableModelInputs.Select(x => x + " obj" + x).ToArray())+",";
+
+                    lsTableCalling.Add("lsPTables.Add(" + tab.TableName + "Method(" + strParams + " ref sbLog));");
+                }
+
+
+                lsResult = new List<string>();
+                if (objInput.ModelVariables.Count > 0)
+                {
+                    var xt = String.Join(",", objInput.ModelVariables.Where(y => y.ModelType == "N").Select(x => x.ModelName + " obj" + x.ModelName).ToArray());
+                    if (objInput.ModelVariables.Where(y => y.ModelType == "L").Count() > 0)
+                        xt = xt + (xt != "" ? "," : "") + String.Join(",", objInput.ModelVariables.Where(y => y.ModelType == "L").Select(x => "List<" + x.ModelName + "> ls" + x.ModelName).ToArray());
+                    lsResult.Add(xt + ",");
+                }
+
+                else
+                    lsResult.Add("");
+
+                if (lsTables.Count > 0)
+                    lsResult.Add(String.Join("\r\n", lsTables.ToArray()));
+                else
+                    lsResult.Add("");
+
+                if (lsTableCalling.Count > 0)
+                    lsResult.Add(String.Join("\r\n", lsTableCalling.ToArray()));
+                else
+                    lsResult.Add("");
+
+            }
+            catch (Exception ex)
+            {
+            }
+
+            return lsResult;
+        }
+        private List<string> GetFooterInfo(TemplateModel objTemplate)
+        {
+            try
+            {
+                var lsFooter = new List<string>();
+
+
+            }
+            catch (Exception ex)
+            {
+
+            }
+           
+
+            return null;
         } 
     }
     public class C : PdfTemplate
@@ -547,36 +1184,38 @@ namespace PdfTemplator.PdfCore.Business.PdfModule
                     {
                         if (objInput.Body.Tables.Count > 0)
                         {
-                            List<string> lsTables = new List<string>();
-                            List<string> lsTableCalling = new List<string>();
-                            List<string> lsPdfTableModelInputs = new List<string>();
-                            var strParams = "";
-                            foreach (var tab in objInput.Body.Tables)
-                            {
-                                lsPdfTableModelInputs = new List<string>();
-                                strParams = "";
+                            //List<string> lsTables = new List<string>();
+                            //List<string> lsTableCalling = new List<string>();
+                            //List<string> lsPdfTableModelInputs = new List<string>();
+                            //var strParams = "";
+                            //foreach (var tab in objInput.Body.Tables)
+                            //{
+                            //    lsPdfTableModelInputs = new List<string>();
+                            //    strParams = "";
 
-                                lsTables.Add(ProcessTable(tab,out lsPdfTableModelInputs));
+                            //    lsTables.Add(ProcessTable(tab,out lsPdfTableModelInputs));
 
-                                if(lsPdfTableModelInputs.Count>0)
-                                    strParams = string.Join(",", lsPdfTableModelInputs.Select(x => "obj" + x).ToArray()) + ",";
-                               // strParams = string.Join(",", lsPdfTableModelInputs.Select(x => x + " obj" + x).ToArray())+",";
+                            //    if(lsPdfTableModelInputs.Count>0)
+                            //        strParams = string.Join(",", lsPdfTableModelInputs.Select(x => "obj" + x).ToArray()) + ",";
+                            //   // strParams = string.Join(",", lsPdfTableModelInputs.Select(x => x + " obj" + x).ToArray())+",";
 
-                                lsTableCalling.Add("lsPTables.Add("+tab.TableName+"Method(" + strParams + " ref sbLog));");
-                            }
+                            //    lsTableCalling.Add("lsPTables.Add("+tab.TableName+"Method(" + strParams + " ref sbLog));");
+                            //}
 
-                            var reportParams = "";
-                            var listOfmethods = "";
-                            var listOfmethodCalling = "";
+                            //var reportParams = "";
+                            //var listOfmethods = "";
+                            //var listOfmethodCalling = "";
 
-                            if (objTemplate.ModelVariables.Count>0)
-                                reportParams =String.Join(",", objTemplate.ModelVariables.Select(x => x + " obj" + x).ToArray()) + ",";
+                            //if (objTemplate.ModelVariables.Count>0)
+                            //    reportParams =String.Join(",", objTemplate.ModelVariables.Select(x => x + " obj" + x).ToArray()) + ",";
 
-                            if (lsTables.Count>0)
-                                listOfmethods = String.Join("\r\n", lsTables.ToArray());
+                            //if (lsTables.Count>0)
+                            //    listOfmethods = String.Join("\r\n", lsTables.ToArray());
 
-                            if (lsTableCalling.Count > 0)
-                                listOfmethodCalling = String.Join("\r\n", lsTableCalling.ToArray());
+                            //if (lsTableCalling.Count > 0)
+                            //    listOfmethodCalling = String.Join("\r\n", lsTableCalling.ToArray());
+
+                           var lsBody= GetBodyContent(objInput);
 
 
                             //Prepare Document
@@ -596,12 +1235,12 @@ namespace PdfTemplator.PdfCore.Business.PdfModule
 
 
                             //Module Pramaeters
-                            strDocMethod = strDocMethod.Replace(PdfTemplateManager.GetPdfDictionary()["PdfReportParams"], reportParams);
+                            strDocMethod = strDocMethod.Replace(PdfTemplateManager.GetPdfDictionary()["PdfReportParams"], lsBody[0]);
                             //List of Table Calling Code
-                            strDocMethod = strDocMethod.Replace(PdfTemplateManager.GetPdfDictionary()["PdfReportPTableCallingList"], listOfmethodCalling);
+                            strDocMethod = strDocMethod.Replace(PdfTemplateManager.GetPdfDictionary()["PdfReportPTableCallingList"], lsBody[2]);
 
                             //List of Table Code
-                            strDocMethod = strDocMethod.Replace(PdfTemplateManager.GetPdfDictionary()["PdfReportPTablesList"], listOfmethods);
+                            strDocMethod = strDocMethod.Replace(PdfTemplateManager.GetPdfDictionary()["PdfReportPTablesList"], lsBody[1]);
 
 
 
@@ -641,6 +1280,73 @@ namespace PdfTemplator.PdfCore.Business.PdfModule
             
             }
             return null;
+        }
+
+        private List<string> GetBodyContent(C_TemplateModel objInput)
+        {
+            List<string> lsResult = null;
+            try
+            {
+
+                List<string> lsTables = new List<string>();
+                List<string> lsTableCalling = new List<string>();
+                List<string> lsPdfTableModelInputs = new List<string>();
+                var strParams = "";
+                foreach (var tab in objInput.Body.Tables)
+                {
+                    lsPdfTableModelInputs = new List<string>();
+                    strParams = "";
+                    if(tab.isDynamicTab)
+                        lsTables.Add(ProcessDynamicTable(tab, objInput.ModelVariables, out lsPdfTableModelInputs));
+                    else
+                        lsTables.Add(ProcessTable(tab, objInput.ModelVariables, out lsPdfTableModelInputs));
+
+                    if (lsPdfTableModelInputs.Count > 0)
+                    {
+                        var localParams = new List<string>();
+                        foreach (var item in lsPdfTableModelInputs)
+                        {
+                            localParams.Add(objInput.ModelVariables.Find(x => x.ModelName == item).ModelType == "L" ? "ls" + item : "obj" + item);
+
+                          
+                        }
+                        strParams = string.Join(",", localParams.ToArray()) + ",";
+                    }
+                      
+                    // strParams = string.Join(",", lsPdfTableModelInputs.Select(x => x + " obj" + x).ToArray())+",";
+
+                    lsTableCalling.Add("lsPTables.Add(" + tab.TableName + "Method(" + strParams + " ref sbLog));");
+                }
+
+
+                lsResult = new List<string>();
+                if (objInput.ModelVariables.Count > 0)
+                {
+                    var xt = String.Join(",", objInput.ModelVariables.Where(y => y.ModelType == "N").Select(x => x.ModelName + " obj" + x.ModelName).ToArray());
+                    if(objInput.ModelVariables.Where(y => y.ModelType == "L").Count()>0)
+                        xt = xt+(xt !=""?",":"")+ String.Join(",", objInput.ModelVariables.Where(y => y.ModelType == "L").Select(x => "List<"+x.ModelName +"> ls" + x.ModelName).ToArray());
+                    lsResult.Add(xt + ",");
+                }
+                  
+                else
+                    lsResult.Add("");
+
+                if (lsTables.Count > 0)
+                    lsResult.Add(String.Join("\r\n", lsTables.ToArray()));
+                else
+                    lsResult.Add("");
+
+                if (lsTableCalling.Count > 0)
+                    lsResult.Add(String.Join("\r\n", lsTableCalling.ToArray()));
+                else
+                    lsResult.Add("");
+
+            }
+            catch (Exception ex)
+            {
+            }
+
+            return lsResult;
         }
     }
 

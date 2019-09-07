@@ -14,7 +14,7 @@ namespace PdfTemplator.PdfCore.Models.Pdf
         public string Name { get; set; }
         public string NameSpace { get; set; }
         public string Type { get; set; }
-        public List<string> ModelVariables { get; set; }
+        public List<ModelInfoModel> ModelVariables { get; set; }
         public List<BindingModel> bindingModelProps { get; set; }
     }
 
@@ -73,6 +73,7 @@ namespace PdfTemplator.PdfCore.Models.Pdf
         public bool isHavingBorder { get; set; } = true;
         public bool isSeparateMethod { get; set; } = true;
         public bool isDynamicTab { get; set; } = false;
+        public List<RowModel> HeaderRows { get; set; } = new List<RowModel>();
         public List<RowModel> Rows { get; set; } = new List<RowModel>();
     }
     public class RowModel
@@ -87,7 +88,7 @@ namespace PdfTemplator.PdfCore.Models.Pdf
     {
         //cell info
         public int CellNo { get; set; }
-        public int RowNo { get; set; }
+       // public int RowNo { get; set; }
         public float Height { get; set; } = 12f;
         //span
         public int RowSpan { get; set; } = 1;
@@ -111,6 +112,8 @@ namespace PdfTemplator.PdfCore.Models.Pdf
     }
     public class TableCell : CellModel
     {
+        public int TableVAlient { get; set; } = iTextSharp.text.pdf.PdfPCell.ALIGN_MIDDLE;
+        public int TableHAlient { get; set; } = iTextSharp.text.pdf.PdfPCell.ALIGN_CENTER;
         public TableModel tableModel { get; set; }
     }
     public class LabelCell : CellModel
@@ -132,35 +135,39 @@ namespace PdfTemplator.PdfCore.Models.Pdf
         public ColorModel Color { get; set; } = new ColorModel { Type = "PDF", pdfColor = iTextSharp.text.Color.BLACK };
         public string DataFieldName { get; set; }
         public string ModelName { get; set; }
+        public bool IsDynamicField { get; set; } = false;
+ 
     }
     public class ImageUrlCell : CellModel
     {
         public string Src { get; set; }
-        public float Sclae { get; set; }
+        public float Scale { get; set; } = 30f;
 
     }
     public class ImageByteCell : CellModel
     {
-        public byte[] Image { get; set; }
-        public float Scale { get; set; }
-        public int ScaleAbWidth { get; set; }
-        public int ScaleAbHeight { get; set; }
+        public string ImageFieldName { get; set; }
+        public string ModelName { get; set; }
+        public float Scale { get; set; } = 30f;
+        //public int ScaleAbWidth { get; set; }
+        //public int ScaleAbHeight { get; set; }
     }
     public class ImageUrlSubHeaderCell : CellModel
     {
-        public TableCell TableCell { get; set; }
         public LabelCell label { get; set; }
         public string Src { get; set; }
-        public float Sclae { get; set; }
+        public float Sclae { get; set; } = 30f;
+        public float AbWidth { get; set; } = 210f;
+        public float TableTotalWidth { get; set; } = 250f;
     }
     public class ImageByteSubHeaderCell : CellModel
-    {
-        public TableCell TableCell { get; set; }
+    {      
         public LabelCell label { get; set; }
-        public byte[] Image { get; set; }
-        public float Scale { get; set; }
-        public int ScaleAbWidth { get; set; }
-        public int ScaleAbHeight { get; set; }
+        public string ImageFieldName { get; set; }
+        public string ModelName { get; set; }
+        public float Scale { get; set; } = 30f;
+        public float AbWidth { get; set; } = 210f;
+        public float TableTotalWidth { get; set; } = 250f;
     }
     #endregion
 
@@ -190,6 +197,11 @@ namespace PdfTemplator.PdfCore.Models.Pdf
     {
         public string PropName { get; set; }
         public string ModelVariable { get; set; }
+    }
+    public class ModelInfoModel
+    {
+        public string ModelName { get; set; }
+        public string ModelType { get; set; } = "N";//list or normal
     }
     #endregion
 }
