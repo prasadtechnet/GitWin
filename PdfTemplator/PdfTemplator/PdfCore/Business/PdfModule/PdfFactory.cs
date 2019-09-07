@@ -420,21 +420,118 @@ namespace PdfTemplator.PdfCore.Business.PdfModule
     }
     public class CF : PdfTemplate
     {
-       
-
         public override TemplateResponse ProcessTemplate(TemplateModel objTemplate)
         {
-            var resp = new TemplateResponse();
+
             try
             {
+                var objInput = objTemplate as C_TemplateModel;
+                if (objInput.Name != "" && objInput.NameSpace != "")
+                {
+                    if (objInput.Body != null)
+                    {
+                        if (objInput.Body.Tables.Count > 0)
+                        {
+                            List<string> lsTables = new List<string>();
+                            List<string> lsTableCalling = new List<string>();
+                            List<string> lsPdfTableModelInputs = new List<string>();
+                            var strParams = "";
+                            foreach (var tab in objInput.Body.Tables)
+                            {
+                                lsPdfTableModelInputs = new List<string>();
+                                strParams = "";
+
+                                lsTables.Add(ProcessTable(tab, out lsPdfTableModelInputs));
+
+                                if (lsPdfTableModelInputs.Count > 0)
+                                    strParams = string.Join(",", lsPdfTableModelInputs.Select(x => "obj" + x).ToArray()) + ",";
+                                // strParams = string.Join(",", lsPdfTableModelInputs.Select(x => x + " obj" + x).ToArray())+",";
+
+                                lsTableCalling.Add("lsPTables.Add(" + tab.TableName + "Method(" + strParams + " ref sbLog));");
+                            }
+
+                            var reportParams = "";
+                            var listOfmethods = "";
+                            var listOfmethodCalling = "";
+
+                            if (objTemplate.ModelVariables.Count > 0)
+                                reportParams = String.Join(",", objTemplate.ModelVariables.Select(x => x + " obj" + x).ToArray()) + ",";
+
+                            if (lsTables.Count > 0)
+                                listOfmethods = String.Join("\r\n", lsTables.ToArray());
+
+                            if (lsTableCalling.Count > 0)
+                                listOfmethodCalling = String.Join("\r\n", lsTableCalling.ToArray());
+
+
+                            //Prepare Document
+                            var strDocMethod = PdfTemplateManager.GetFileContent(TemplatePhysicalFile.Template);
+                            var strCoreMethods = PdfTemplateManager.GetFileContent(TemplatePhysicalFile.PdfCore);
+
+                            //Page Events
+                            strDocMethod = strDocMethod.Replace(PdfTemplateManager.GetPdfDictionary()["DocumentPageEvent"], "");
+                            strDocMethod = strDocMethod.Replace(PdfTemplateManager.GetPdfDictionary()["PdfDocumentPageEventClass"], "");
+                            //Namespace
+                            strDocMethod = strDocMethod.Replace(PdfTemplateManager.GetPdfDictionary()["ModuleNameSpace"], objTemplate.NameSpace);
+                            //Module Name
+                            strDocMethod = strDocMethod.Replace(PdfTemplateManager.GetPdfDictionary()["ModuleName"], objTemplate.Name);
+                            //Core Abstract 
+                            strDocMethod = strDocMethod.Replace(PdfTemplateManager.GetPdfDictionary()["PdfCoreClass"], strCoreMethods);
+
+
+
+                            //Module Pramaeters
+                            strDocMethod = strDocMethod.Replace(PdfTemplateManager.GetPdfDictionary()["PdfReportParams"], reportParams);
+                            //List of Table Calling Code
+                            strDocMethod = strDocMethod.Replace(PdfTemplateManager.GetPdfDictionary()["PdfReportPTableCallingList"], listOfmethodCalling);
+
+                            //List of Table Code
+                            strDocMethod = strDocMethod.Replace(PdfTemplateManager.GetPdfDictionary()["PdfReportPTablesList"], listOfmethods);
+
+
+
+                            //Model
+                            var strModelFileContent = "";
+                            if (objTemplate.ModelVariables.Count > 0)
+                                strModelFileContent = ProcessModelGeneration(objTemplate.ModelVariables, objTemplate.bindingModelProps, objTemplate.NameSpace);
+
+
+
+                            var objResp = new TemplateResponse();
+                            //Template File 
+                            objResp.PdfTemplateFileName = objTemplate.Name + ".cs";
+                            objResp.PdfTemplateFileContent = strDocMethod;
+
+                            //Model File
+                            objResp.PdfModelsFileName = objTemplate.Name + "Models.cs";
+                            objResp.PdfModelsFileContent = strModelFileContent;
+
+                            objResp.Status = true;
+
+                            return objResp;
+                        }
+                    }
+                    else
+                        return new TemplateResponse { Status = false, Message = "Invalid Name / Namespace" };
+                }
+                else
+                    return new TemplateResponse { Status = false, Message = "Invalid Name / Namespace" };
+
 
             }
             catch (Exception ex)
             {
-                resp.Message = "Exception:" + ex.Message;
+
+                return new TemplateResponse { Status = false, Message = "Exception:" + ex.Message };
+
             }
-            return resp;
+            return null;
         }
+
+        private List<string> GetFooterInfo(TemplateModel objTemplate)
+        {
+
+        } 
     }
     public class C : PdfTemplate
     {
