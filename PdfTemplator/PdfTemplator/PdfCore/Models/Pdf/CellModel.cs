@@ -202,6 +202,7 @@ namespace PdfTemplator.PdfCore.Models.Pdf
     {
         public string ModelName { get; set; }
         public string ModelType { get; set; } = "N";//list or normal
+
     }
     #endregion
 }

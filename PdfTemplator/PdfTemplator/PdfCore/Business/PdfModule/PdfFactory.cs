@@ -783,7 +783,7 @@ namespace PdfTemplator.PdfCore.Business.PdfModule
             return null;
         }
 
-
+     
         private List<string> GetBodyContent(HCF_TemplateModel objInput)
         {
             List<string> lsResult = null;
@@ -935,7 +935,104 @@ namespace PdfTemplator.PdfCore.Business.PdfModule
             return null;
         }
 
+        private List<string> GetFooterInfo(HC_TemplateModel objInput)
+        {
+            try
+            {
+                //PdfPageEventObject
+                //PageFooterMethod-empty
+                //PageHeaderMethod
+                //PageEventVaraiblesParameter
+                //PageEventConstructorParameters
+                //PageEventVaraibles
 
+
+                var lsHeader = new List<string>();
+
+                try
+                {
+
+                    List<string> lsTables = new List<string>();
+                    List<string> lsTableCalling = new List<string>();
+                    List<string> lsPdfTableModelInputs = new List<string>();
+                    var strParams = "";
+                    foreach (var tab in objInput.PageHeader.Tables)
+                    {
+                        lsPdfTableModelInputs = new List<string>();
+                        strParams = "";
+                        
+                        lsTables.Add(ProcessTable(tab, objInput.ModelVariables, out lsPdfTableModelInputs));
+
+                        if (lsPdfTableModelInputs.Count > 0)
+                        {
+                            var localParams = new List<string>();
+                            foreach (var item in lsPdfTableModelInputs)
+                            {
+                                localParams.Add(objInput.ModelVariables.Find(x => x.ModelName == item).ModelType == "L" ? "ls" + item : "obj" + item);
+                            }
+                            strParams = string.Join(",", localParams.ToArray()) + ",";
+                        }
+
+                        // strParams = string.Join(",", lsPdfTableModelInputs.Select(x => x + " obj" + x).ToArray())+",";
+
+                        lsTableCalling.Add("document.Add(_objPdfHeader." + tab.TableName + "Method(" + strParams + " ref sbLog));");
+                    }
+
+
+                   var  lsResult = new List<string>();
+                    //if (objInput.ModelVariables.Count > 0)
+                    //{
+                    //    var xt = String.Join(",", objInput.ModelVariables.Where(y => y.ModelType == "N").Select(x => x.ModelName + " obj" + x.ModelName).ToArray());
+                    //    if (objInput.ModelVariables.Where(y => y.ModelType == "L").Count() > 0)
+                    //        xt = xt + (xt != "" ? "," : "") + String.Join(",", objInput.ModelVariables.Where(y => y.ModelType == "L").Select(x => "List<" + x.ModelName + "> ls" + x.ModelName).ToArray());
+                    //    lsResult.Add(xt + ",");
+                    //}
+
+                    //else
+                    //    lsResult.Add("");
+
+                   
+                    if (lsTables.Count > 0)
+                        lsResult.Add(String.Join("\r\n", lsTables.ToArray()));
+                    else
+                        lsResult.Add("");
+
+                    //if (lsTableCalling.Count > 0)
+                    //    lsResult.Add(String.Join("\r\n", lsTableCalling.ToArray()));
+                    //else
+                    //    lsResult.Add("");
+
+                    var strHeader = PdfTemplateManager.GetFileContent(TemplatePhysicalFile.PageHeader);
+
+                    strHeader = strHeader.Replace(PdfTemplateManager.GetPdfDictionary()["PageHeaderTablesCalling"], String.Join("\r\n", lsTableCalling.ToArray()));
+                    var strHeaderPageEvent = PdfTemplateManager.GetFileContent(TemplatePhysicalFile.PageEvent);
+
+                    strHeaderPageEvent = strHeaderPageEvent.Replace(PdfTemplateManager.GetPdfDictionary()["PageEventVaraibles"], "");
+                    strHeaderPageEvent = strHeaderPageEvent.Replace(PdfTemplateManager.GetPdfDictionary()["PageEventConstructorParameters"], "");
+                    strHeaderPageEvent = strHeaderPageEvent.Replace(PdfTemplateManager.GetPdfDictionary()["PageEventVaraiblesParameter"], "");
+                    strHeaderPageEvent = strHeaderPageEvent.Replace(PdfTemplateManager.GetPdfDictionary()["PageHeaderMethod"], "");
+
+                    strHeaderPageEvent = strHeaderPageEvent.Replace(PdfTemplateManager.GetPdfDictionary()["PageFooterMethod"], "");
+                    lsHeader.Add(strHeaderPageEvent);
+
+
+                }
+                catch (Exception ex)
+                {
+                }
+
+               
+                return lsHeader;
+                // strFooterPageEvent = strFooterPageEvent.Replace("PdfPageEventObject", "");
+            }
+            catch (Exception ex)
+            {
+
+            }
+
+
+            return null;
+        }
         private List<string> GetBodyContent(HC_TemplateModel objInput)
         {
             List<string> lsResult = null;
@@ -1017,9 +1114,11 @@ namespace PdfTemplator.PdfCore.Business.PdfModule
                     {
                         if (objInput.Body.Tables.Count > 0)
                         {
-                         
 
+                            var lsFooter = GetFooterInfo(objInput);
                             var lsBody = GetBodyContent(objInput);
+
+                            var objPageEvent = ",new PdfPageEvent()";
 
 
                             //Prepare Document
@@ -1027,8 +1126,8 @@ namespace PdfTemplator.PdfCore.Business.PdfModule
                             var strCoreMethods = PdfTemplateManager.GetFileContent(TemplatePhysicalFile.PdfCore);
 
                             //Page Events
-                            strDocMethod = strDocMethod.Replace(PdfTemplateManager.GetPdfDictionary()["DocumentPageEvent"], "");
-                            strDocMethod = strDocMethod.Replace(PdfTemplateManager.GetPdfDictionary()["PdfDocumentPageEventClass"], "");
+                            strDocMethod = strDocMethod.Replace(PdfTemplateManager.GetPdfDictionary()["PdfPageEventObject"], objPageEvent);
+                            strDocMethod = strDocMethod.Replace(PdfTemplateManager.GetPdfDictionary()["PdfDocumentPageEventClass"], lsFooter[0]);
                             //Namespace
                             strDocMethod = strDocMethod.Replace(PdfTemplateManager.GetPdfDictionary()["ModuleNameSpace"], objTemplate.NameSpace);
                             //Module Name
@@ -1153,13 +1252,37 @@ namespace PdfTemplator.PdfCore.Business.PdfModule
 
             return lsResult;
         }
-        private List<string> GetFooterInfo(TemplateModel objTemplate)
+        private List<string> GetFooterInfo(CF_TemplateModel objInput)
         {
             try
             {
+                //PdfPageEventObject
+                //PageFooterMethod
+                //PageHeaderMethod-empty
+                //PageEventVaraiblesParameter-empty
+                //PageEventConstructorParameters-empty
+                //PageEventVaraibles-empty
+
+
                 var lsFooter = new List<string>();
+               
+                if( objInput.PageFooter.FooterType == "N")
+                {
 
+                }
+                var strFooter = PdfTemplateManager.GetFileContent(TemplatePhysicalFile.PageFooter);
+                var strFooterPageEvent = PdfTemplateManager.GetFileContent(TemplatePhysicalFile.PageEvent);
 
+                strFooterPageEvent = strFooterPageEvent.Replace(PdfTemplateManager.GetPdfDictionary()["PageEventVaraibles"], "");
+                strFooterPageEvent = strFooterPageEvent.Replace(PdfTemplateManager.GetPdfDictionary()["PageEventConstructorParameters"], "");
+                strFooterPageEvent = strFooterPageEvent.Replace(PdfTemplateManager.GetPdfDictionary()["PageEventVaraiblesParameter"], "");
+                strFooterPageEvent = strFooterPageEvent.Replace(PdfTemplateManager.GetPdfDictionary()["PageHeaderMethod"], "");
+
+                strFooterPageEvent = strFooterPageEvent.Replace(PdfTemplateManager.GetPdfDictionary()["PageFooterMethod"], strFooter);
+                lsFooter.Add(strFooterPageEvent);
+
+                return lsFooter;
+               // strFooterPageEvent = strFooterPageEvent.Replace("PdfPageEventObject", "");
             }
             catch (Exception ex)
             {

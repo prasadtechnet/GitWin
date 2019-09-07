@@ -27,8 +27,8 @@ namespace PdfTemplator.PdfCore.Business.PdfModule
             {
                 {TemplatePhysicalFile.PdfCore,basePath+"PdfCore.txt"},
                 {TemplatePhysicalFile.PageEvent,basePath+"PdfPageEvent.txt"},
-                {TemplatePhysicalFile.PageHeader,basePath+"PdfFooter.txt"},
-                {TemplatePhysicalFile.PageFooter,basePath+"PdfHeader.txt"},
+                {TemplatePhysicalFile.PageHeader,basePath+"PdfHeader.txt"},
+                {TemplatePhysicalFile.PageFooter,basePath+"PdfFooter.txt"},
                 {TemplatePhysicalFile.Template,basePath+"PdfTemplate.txt"},
                 {TemplatePhysicalFile.TableMethod,basePath+"PdfTableMethod.txt"} ,
                 {TemplatePhysicalFile.TableVariable,basePath+"PdfPTableVariable.txt"}              
@@ -51,10 +51,12 @@ namespace PdfTemplator.PdfCore.Business.PdfModule
                  {"PageEventVaraiblesParameter","/*<#PdfPageEventVaraiblesParameter#>*/"},
                  {"PageFooterMethod","/*<#PdfPageEventPageFooterMethod#>*/"},
                  {"PageHeaderMethod","/*<#PdfPageEventPageHeaderMethod#>*/"},
+                 {"PdfPageEventObject","/*<#PdfDocumentPageEvent#>*/"},
+                 
                 #endregion
 
                 #region Template
-                { "DocumentPageEvent","/*<#PdfDocumentPageEvent#>*/"},
+                //{ "DocumentPageEvent","/*<#PdfDocumentPageEvent#>*/"},
                 { "ModuleNameSpace","/*<#ModuleNameSpace>*/"},
                 { "ModuleName","/*<#ModuleName>*/"},
                 { "PdfReportParams","/*<#PdfReportParams>*/"},
@@ -115,10 +117,10 @@ namespace PdfTemplator.PdfCore.Business.PdfModule
                     strRes = "PhraseCell({0},{1}, {2},{3})";
                     break;
 
-                case "TABLEDYNMCCELL":
-                    //iTextSharp.text.pdf.PdfPTable table, int hAlign, int vAlign= iTextSharp.text.pdf.PdfPCell.ALIGN_TOP, iTextSharp.text.Color borderColor=null
-                    strRes = "\r\n #region Items \r\nfor(intChild=0;intChild<{0}.Count;intChild++)\r\n{\r\n {1}  \r\n}\r\n#endregion\r\n";
-                    break;
+                //case "TABLEDYNMCCELL":
+                //    //iTextSharp.text.pdf.PdfPTable table, int hAlign, int vAlign= iTextSharp.text.pdf.PdfPCell.ALIGN_TOP, iTextSharp.text.Color borderColor=null
+                //    strRes = "\r\n #region Items \r\nfor(intChild=0;intChild<{0}.Count;intChild++)\r\n{\r\n {1}  \r\n}\r\n#endregion\r\n";
+                //    break;
             }
 
             return strRes;
