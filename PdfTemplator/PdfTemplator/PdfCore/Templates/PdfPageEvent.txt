@@ -1,5 +1,6 @@
 ﻿ public class PdfPageEvent : iTextSharp.text.pdf.PdfPageEventHelper
     {       
+	    StringBuilder sbLog = new StringBuilder();
         /*<#PdfPageEventVaraibles#>*/
         public PdfPageEvent(/*<#PdfPageEventParameters#>*/ )
         {
@@ -12,4 +13,5 @@
 
          /*<#PdfPageEventPageHeaderMethod#>*/
       
+	    /*<#PdfPageEventPageLocalMethod#>*/
     }

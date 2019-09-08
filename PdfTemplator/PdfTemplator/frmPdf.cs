@@ -24,11 +24,11 @@ namespace PdfTemplator
         {
 
             //  var strRes= Enum.GetName(typeof(PdfCore.Business.PdfModule.TemplatePhysicalFile), 1);
-
-            var pdfContentT = new HC_TemplateModel
+            //HCF
+            var pdfContentT = new HCF_TemplateModel
             {
-                Name = "TestPdfTemplate_HC",
-                Type = "HC",
+                Name = "TestPdfTemplate_HCF",
+                Type = "HCF",
                 NameSpace = "PdfModule.PDF",
                 bindingModelProps = new List<BindingModel> {
                     new BindingModel {ModelVariable= "HeaderDetail", PropName= "TestValue" },
@@ -98,7 +98,7 @@ namespace PdfTemplator
                 },
                 PageHeader = new PageHeaderSection
                 {
-                   Tables=new List<TableModel>
+                    Tables = new List<TableModel>
                    {
                                   new TableModel
                                   {
@@ -181,8 +181,171 @@ namespace PdfTemplator
 
                                    },
                    }
+                },
+                PageFooter=new PageFooterSection
+                {
+                    FooterType="N"
                 }
             };
+            //HC-content and Header
+            //var pdfContentT = new HC_TemplateModel
+            //{
+            //    Name = "TestPdfTemplate_HC",
+            //    Type = "HC",
+            //    NameSpace = "PdfModule.PDF",
+            //    bindingModelProps = new List<BindingModel> {
+            //        new BindingModel {ModelVariable= "HeaderDetail", PropName= "TestValue" },
+            //        //new BindingModel {ModelVariable="ImageDetail",PropName="CustSign" },
+            //        //new BindingModel {ModelVariable="ImageDetail",PropName="TechSign"  },
+            //        //new BindingModel {ModelVariable="ItemDetails",PropName="HD1Field" },
+            //        //new BindingModel {ModelVariable="ItemDetails",PropName="HD2Field"  },
+            //        //new BindingModel {ModelVariable="ItemDetails",PropName="HD3Field"  },
+            //    },
+            //    ModelVariables = new List<ModelInfoModel> {
+            //        new ModelInfoModel { ModelName = "HeaderDetail",ModelType="N" },
+            //        //new ModelInfoModel{ModelName="ImageDetail",ModelType="N" },
+            //        //new ModelInfoModel{ModelName="ItemDetails",ModelType="L" }
+            //    },
+            //    Body = new BodySectionModel
+            //    {
+            //        Tables = new List<TableModel>
+            //        {
+            //           new TableModel
+            //           {
+            //               isDynamicTab=false,
+            //               isHavingBorder=true,
+            //               isChildTab=false,
+            //               isSeparateMethod=true,
+            //               TableName="Detail",
+            //               noofClmns=2,
+            //               width=530f,
+            //               Colwidth=new List<float>{0.5f,0.5f },
+            //               spaceAfter=10f,
+            //               spaceBefore=0f,
+            //               Rows=new List<RowModel>{
+            //                   new RowModel{
+            //                       Cells=new List<CellModel>
+            //                       {
+            //                           new LabelCell
+            //                           {
+            //                               CellNo=1,
+            //                               ContentType="Label",
+            //                               Text="Test"
+            //                           },
+            //                            new EmptyCell
+            //                           {
+            //                               CellNo=2,
+            //                               ContentType="EMPTYCELL",
+            //                               Text=""
+            //                           },
+            //                            new FieldCell
+            //                            {
+            //                                CellNo=3,
+            //                                ContentType="FIELD",
+            //                                DataFieldName="TestValue",
+            //                                ModelName="HeaderDetail"
+            //                            },
+            //                            new EmptyCell
+            //                           {
+            //                               CellNo=4,
+            //                               ContentType="EMPTYCELL",
+            //                               Text=""
+            //                           }
+            //                       }
+            //                   }
+            //               }
+
+            //           },
+
+            //        }
+            //    },
+            //    PageHeader = new PageHeaderSection
+            //    {
+            //       Tables=new List<TableModel>
+            //       {
+            //                      new TableModel
+            //                      {
+            //                          isDynamicTab=false,
+            //                          isHavingBorder=true,
+            //                          isChildTab=false,
+            //                          isSeparateMethod=true,
+            //                          TableName="PageLogoDetail",
+            //                          noofClmns=2,
+            //                          width=530f,
+            //                          Colwidth=new List<float>{0.5f,0.5f },
+            //                          spaceAfter=10f,
+            //                          spaceBefore=0f,
+            //                          Rows=new List<RowModel>{
+            //                              new RowModel{
+            //                                  Cells=new List<CellModel>
+            //                                  {
+
+            //                                       new ImageUrlCell{
+            //                                           CellNo=1,
+            //                                           ContentType="IMAGEURL",
+            //                                           Src="https://www.gstatic.com/webp/gallery/4.sm.jpg",
+            //                                           Scale=20f,
+            //                                           HAlign=iTextSharp.text.pdf.PdfPCell.ALIGN_LEFT
+            //                                       },
+            //                                       new LabelCell
+            //                                       {
+            //                                           CellNo=1,
+            //                                           ContentType="Label",
+            //                                           Text="Heading"
+            //                                       },
+            //                                  }
+            //                              }
+            //                          }
+            //                      },
+            //                      new TableModel
+            //                       {
+            //                           isDynamicTab=false,
+            //                           isHavingBorder=true,
+            //                           isChildTab=false,
+            //                           isSeparateMethod=true,
+            //                           TableName="PageHeaderDetail",
+            //                           noofClmns=2,
+            //                           width=530f,
+            //                           Colwidth=new List<float>{0.5f,0.5f },
+            //                           spaceAfter=10f,
+            //                           spaceBefore=0f,
+            //                           Rows=new List<RowModel>{
+            //                               new RowModel{
+            //                                   Cells=new List<CellModel>
+            //                                   {
+            //                                       new LabelCell
+            //                                       {
+            //                                           CellNo=1,
+            //                                           ContentType="Label",
+            //                                           Text="Test"
+            //                                       },
+            //                                        new EmptyCell
+            //                                       {
+            //                                           CellNo=2,
+            //                                           ContentType="EMPTYCELL",
+            //                                           Text=""
+            //                                       },
+            //                                        new FieldCell
+            //                                        {
+            //                                            CellNo=3,
+            //                                            ContentType="FIELD",
+            //                                            DataFieldName="TestValue",
+            //                                            ModelName="HeaderDetail"
+            //                                        },
+            //                                        new EmptyCell
+            //                                       {
+            //                                           CellNo=4,
+            //                                           ContentType="EMPTYCELL",
+            //                                           Text=""
+            //                                       }
+            //                                   }
+            //                               }
+            //                           }
+
+            //                       },
+            //       }
+            //    }
+            //};
             //CF-content and Footer
 
             //var pdfContentT = new CF_TemplateModel

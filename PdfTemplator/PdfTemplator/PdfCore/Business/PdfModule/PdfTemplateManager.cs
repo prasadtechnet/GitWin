@@ -52,6 +52,7 @@ namespace PdfTemplator.PdfCore.Business.PdfModule
                  {"PageFooterMethod","/*<#PdfPageEventPageFooterMethod#>*/"},
                  {"PageHeaderMethod","/*<#PdfPageEventPageHeaderMethod#>*/"},
                  {"PdfPageEventObject","/*<#PdfDocumentPageEvent#>*/"},
+                 {"PdfPageEventLocalMethods","/*<#PdfPageEventPageLocalMethod#>*/"},
                  
                 #endregion
 
