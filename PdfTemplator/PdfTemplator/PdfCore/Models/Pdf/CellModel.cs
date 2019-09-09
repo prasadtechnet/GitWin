@@ -157,7 +157,7 @@ namespace PdfTemplator.PdfCore.Models.Pdf
     {
         public LabelCell label { get; set; }
         public string Src { get; set; }
-        public float Sclae { get; set; } = 30f;
+        public float Scale { get; set; } = 30f;
         public float AbWidth { get; set; } = 210f;
         public float TableTotalWidth { get; set; } = 250f;
     }

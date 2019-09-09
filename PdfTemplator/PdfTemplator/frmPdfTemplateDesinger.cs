@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using PdfTemplator.PdfCore.Business;
 using PdfTemplator.UI.Business;
 using PdfTemplator.UI.Master;
 using PdfTemplator.UI.Models;
@@ -303,7 +304,15 @@ namespace PdfTemplator
 
         private void btnGenerateFile_Click(object sender, EventArgs e)
         {
+            TemplateInputGenerator objGen = new TemplateInputGenerator();
+            var objTemplate= objGen.PrepareMainTemplate(tvDocument,lsModels);
 
+            IBusinessManager objBM = new BusinessManager(new PdfCore.Business.FileModule.FileModule());
+           var respModel= objBM.GeneratePdfTemplate(objTemplate, objTemplate.Location);
+            if (respModel.Status)
+            {
+                MessageBox.Show("Created successfully");
+            }
         }
 
 

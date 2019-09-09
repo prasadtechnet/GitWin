@@ -15,7 +15,8 @@ namespace PdfTemplator.UI.PropertyGridClass
         [CategoryAttribute("Image Info"), DescriptionAttribute("ControlType")]
         public string ControlType { get; set; } = "table";
 
-
+        [CategoryAttribute("Image Info"), DescriptionAttribute("Image Height"), DisplayName("Height")]
+        public float Height { get; set; } = 50f;
         //Image Field
         [CategoryAttribute("Image Info"), DescriptionAttribute("Scale of Image")]
         public float Scale { get; set; } = 30f;
@@ -39,7 +40,7 @@ namespace PdfTemplator.UI.PropertyGridClass
         [CategoryAttribute("Label Style"), DescriptionAttribute("label Color"), DisplayName("Color")]
         public Color LabelColor { get; set; } = Color.Black;
 
-        [CategoryAttribute("Label Style"), DescriptionAttribute("label Height"), DisplayName("Height")]
+        [CategoryAttribute("Label Style"), DescriptionAttribute("label Height"), DisplayName("Label Height")]
         public float LabelHeight { get; set; } = 12f;
     }
 }

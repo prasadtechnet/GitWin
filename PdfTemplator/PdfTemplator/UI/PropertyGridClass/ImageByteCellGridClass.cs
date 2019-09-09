@@ -21,6 +21,8 @@ namespace PdfTemplator.UI.PropertyGridClass
 
         [CategoryAttribute("Binding Model"), DescriptionAttribute("Field Color"), DisplayName("Model Name")]
         public string ImageFieldModel { get; set; }
+        [CategoryAttribute("Image Info"), DescriptionAttribute("IMage Height"), DisplayName("Height")]
+        public float Height { get; set; } = 50f;
 
     }
 }

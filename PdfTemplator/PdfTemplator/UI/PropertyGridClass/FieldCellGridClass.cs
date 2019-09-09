@@ -17,10 +17,10 @@ namespace PdfTemplator.UI.PropertyGridClass
         public string ControlType { get; set; } = "Field";
 
         [CategoryAttribute("Field Style"), DescriptionAttribute("Field Font"), DisplayName("Font")]
-        public Font FieldFont { get; set; }
+        public Font FieldFont { get; set; } = new Font("Arial", 10f, FontStyle.Regular);
 
         [CategoryAttribute("Field Style"), DescriptionAttribute("Field Color"), DisplayName("Color")]
-        public Color FieldColor { get; set; }
+        public Color FieldColor { get; set; } = Color.Black;
 
         [CategoryAttribute("Binding Model"), DescriptionAttribute("Field Color"), DisplayName("Model Name")]
         public string FieldModel { get; set; }

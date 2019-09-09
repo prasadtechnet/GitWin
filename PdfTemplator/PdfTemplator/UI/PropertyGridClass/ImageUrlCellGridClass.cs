@@ -19,5 +19,7 @@ namespace PdfTemplator.UI.PropertyGridClass
 
         [CategoryAttribute("Image Info"), DescriptionAttribute("Scale of Image")]
         public float Scale { get; set; } = 30f;
+        [CategoryAttribute("Image Info"), DescriptionAttribute("Image Height"), DisplayName("Height")]
+        public float Height { get; set; } = 50f;
     }
 }

@@ -14,7 +14,7 @@ namespace PdfTemplator.UI.Business
 {
     public class TemplateInputGenerator
     {
-        public TemplateModel GetTemplate(string type,BodySectionModel objBody=null,PageHeaderSection pageHdr=null,PageFooterSection pageFooter=null)
+        private TemplateModel GetTemplate(string type,BodySectionModel objBody=null,PageHeaderSection pageHdr=null,PageFooterSection pageFooter=null)
         {
             var dict = new Dictionary<string, TemplateModel>
             {
@@ -24,10 +24,10 @@ namespace PdfTemplator.UI.Business
                 {"CUSTOM",new C_TemplateModel(){Body=objBody } }
             };
 
-            return dict[type];
+            return dict[type.ToUpper()];
         }
 
-        public TemplateModel GetHTMLTemplate(TreeView tvSource,List<GridModelProperty> lsModelProps)
+        public TemplateModel PrepareMainTemplate(TreeView tvSource,List<GridModelProperty> lsModelProps)
         {           
             try
             {
@@ -69,7 +69,7 @@ namespace PdfTemplator.UI.Business
 
                 objTemplate.Name = objDocprops.Name;
                 objTemplate.NameSpace = objDocprops.Namespace;
-                objTemplate.Type = objDocprops.Template=="CUSTOM"?"C":objDocprops.Template;
+                objTemplate.Type = objDocprops.Template.ToUpper()=="CUSTOM"?"C":objDocprops.Template;
 
                 objTemplate.Location = objDocprops.Location;
 
@@ -83,7 +83,21 @@ namespace PdfTemplator.UI.Business
 
         private TableModel PrepareMainTable(TreeNode tNode)
         {
-            var objTable = new TableModel();
+           
+           var tabObj= (tNode.Tag as ControlPropertyModel).Properties as TableGridClass;
+            var objTable = new TableModel() {
+                TableName=tabObj.Name,
+                isChildTab=tabObj.IsChildTable,
+                isDynamicTab=tabObj.IsDynamic,
+                isSeparateMethod=tabObj.IsHavingSeparateMethod,
+                noofClmns=tabObj.NoOfColumn,
+                spaceAfter=tabObj.spaceAfter,
+                spaceBefore=tabObj.spaceBefore,
+                Colwidth=tabObj.ColumnWidths.ToList(),
+                width=tabObj.width                
+            };
+
+
             if (tNode.Nodes.Count > 0)
             {
                 objTable.Rows = new List<RowModel>();
@@ -95,7 +109,11 @@ namespace PdfTemplator.UI.Business
                         objRow.Cells = new List<CellModel>();
                         for (int intC = 0; intC < tNode.Nodes[intR].Nodes.Count; intC++)
                         {
-                            objRow.Cells.Add(PrepareCellModel(tNode.Nodes[intR].Nodes[intC]));
+                            for (int intCChild = 0; intCChild < tNode.Nodes[intR].Nodes[intC].Nodes.Count; intCChild++)
+                            {
+                                objRow.Cells.Add(PrepareCellModel(tNode.Nodes[intR].Nodes[intC].Nodes[intCChild]));
+                            }
+                           
                         }
                     }
                     objTable.Rows.Add(objRow);
@@ -128,8 +146,8 @@ namespace PdfTemplator.UI.Business
                             PBottom = parentLabel.PBottom,
                             PLeft = parentLabel.PLeft,
                             PRight = parentLabel.PRight,
-                            BorderPattren=parentLabel.BorderPattren.ToString().Replace("-",","),
-                            ContentType="",
+                            BorderPattren=parentLabel.BorderPattren.ToString().Replace("_",","),
+                            ContentType= "LABEL",
                             HAlign= Master.Master.GetAlignmentNumber(parentLabel.HAlign),
                             VAlign = Master.Master.GetAlignmentNumber(parentLabel.VAlign),
                             Height=objlbl.Height                           
@@ -151,32 +169,121 @@ namespace PdfTemplator.UI.Business
                             PBottom = parentField.PBottom,
                             PLeft = parentField.PLeft,
                             PRight = parentField.PRight,
-                            BorderPattren = parentField.BorderPattren.ToString().Replace("-", ","),
-                            ContentType = "",
+                            BorderPattren = parentField.BorderPattren.ToString().Replace("_", ","),
+                            ContentType = "FIELD",
                             HAlign = Master.Master.GetAlignmentNumber(parentField.HAlign),
                             VAlign = Master.Master.GetAlignmentNumber(parentField.VAlign),
-                            Height = objlbl.Height
+                            Height = objfld.Height
                         };
                         break;
                     case "EMPTY":
                         var objempty = contM.Properties as EmptyCellGridClass;
+                        var parentEmpty = (tNode.Parent.Tag as ControlPropertyModel).Properties as CellGridCalss;
+                        cell = new EmptyCell
+                        {
+                            Text=objempty.Name,                           
+                            ColSpan = parentEmpty.ColSpan,
+                            RowSpan = parentEmpty.RowSpan,
+                            PTop = parentEmpty.PTop,
+                            PBottom = parentEmpty.PBottom,
+                            PLeft = parentEmpty.PLeft,
+                            PRight = parentEmpty.PRight,
+                            BorderPattren = parentEmpty.BorderPattren.ToString().Replace("_", ","),
+                            ContentType = "EMPTYCELL",
+                            HAlign = Master.Master.GetAlignmentNumber(parentEmpty.HAlign),
+                            VAlign = Master.Master.GetAlignmentNumber(parentEmpty.VAlign)                            
+                        };
                         break;
+                     
                     case "TABLE":
-                        //var objtbl = contM.Properties as TableGridClass;
+                        var objtbl = contM.Properties as TableGridClass;
+
                         //PrepareMainTable(tNode.Nodes[0]);
                         break;
                     case "IMAGEURL":
                         var objimgUrl = contM.Properties as ImageUrlCellGridClass;
+                        var parentIU = (tNode.Parent.Tag as ControlPropertyModel).Properties as CellGridCalss;
+                        cell = new ImageUrlCell
+                        {                            
+                            Src = objimgUrl.Src,
+                            Scale = objimgUrl.Scale,                          
+                            ColSpan = parentIU.ColSpan,
+                            RowSpan = parentIU.RowSpan,
+                            PTop = parentIU.PTop,
+                            PBottom = parentIU.PBottom,
+                            PLeft = parentIU.PLeft,
+                            PRight = parentIU.PRight,
+                            BorderPattren = parentIU.BorderPattren.ToString().Replace("_", ","),
+                            ContentType = "IMAGEURL",
+                            HAlign = Master.Master.GetAlignmentNumber(parentIU.HAlign),
+                            VAlign = Master.Master.GetAlignmentNumber(parentIU.VAlign),
+                            Height = objimgUrl.Height
+                        };
                         break;
+                   
                     case "IMAGEBYTE":
                         var objImgByte = contM.Properties as ImageByteCellGridClass;
+                        var parentIB = (tNode.Parent.Tag as ControlPropertyModel).Properties as CellGridCalss;
+                        cell = new ImageByteCell
+                        {
+                            ImageFieldName = objImgByte.Name,
+                            ModelName = objImgByte.ImageFieldModel,                            
+                            Scale = objImgByte.Scale,
+                            ColSpan = parentIB.ColSpan,
+                            RowSpan = parentIB.RowSpan,
+                            PTop = parentIB.PTop,
+                            PBottom = parentIB.PBottom,
+                            PLeft = parentIB.PLeft,
+                            PRight = parentIB.PRight,
+                            BorderPattren = parentIB.BorderPattren.ToString().Replace("_", ","),
+                            ContentType = "IMAGEBYTE",
+                            HAlign = Master.Master.GetAlignmentNumber(parentIB.HAlign),
+                            VAlign = Master.Master.GetAlignmentNumber(parentIB.VAlign),
+                            Height = objImgByte.Height
+                        };
                         break;
                     case "IMAGESUBURL":
                         var objImgSubUrl = contM.Properties as ImageSubUrlCellGridClass;
+                        var parentISU = (tNode.Parent.Tag as ControlPropertyModel).Properties as CellGridCalss;
+                        cell = new ImageUrlSubHeaderCell
+                        {
+                            Src = objImgSubUrl.Src,
+                            Scale = objImgSubUrl.Scale,
+                            ColSpan = parentISU.ColSpan,
+                            RowSpan = parentISU.RowSpan,
+                            PTop = parentISU.PTop,
+                            PBottom = parentISU.PBottom,
+                            PLeft = parentISU.PLeft,
+                            PRight = parentISU.PRight,
+                            BorderPattren = parentISU.BorderPattren.ToString().Replace("_", ","),
+                            ContentType = "IMAGEURLSUB",
+                            HAlign = Master.Master.GetAlignmentNumber(parentISU.HAlign),
+                            VAlign = Master.Master.GetAlignmentNumber(parentISU.VAlign),
+                            Height = objImgSubUrl.Height
+                        };
                         break;
                     case "IMAGESUBBYTE":
                         var objImgSubByte = contM.Properties as ImageSubByteCellGridClass;
+                        var parentISB = (tNode.Parent.Tag as ControlPropertyModel).Properties as CellGridCalss;
+                        cell = new ImageByteSubHeaderCell
+                        {
+                            ImageFieldName = objImgSubByte.Name,
+                            ModelName = objImgSubByte.ImageFieldModel,
+                            Scale = objImgSubByte.Scale,
+                            ColSpan = parentISB.ColSpan,
+                            RowSpan = parentISB.RowSpan,
+                            PTop = parentISB.PTop,
+                            PBottom = parentISB.PBottom,
+                            PLeft = parentISB.PLeft,
+                            PRight = parentISB.PRight,
+                            BorderPattren = parentISB.BorderPattren.ToString().Replace("_", ","),
+                            ContentType = "IMAGEBYTESUB",
+                            HAlign = Master.Master.GetAlignmentNumber(parentISB.HAlign),
+                            VAlign = Master.Master.GetAlignmentNumber(parentISB.VAlign),
+                            Height = objImgSubByte.Height
+                        };
                         break;
+                      
                 
             }
                 

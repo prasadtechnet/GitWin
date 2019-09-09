@@ -19,7 +19,7 @@ namespace PdfTemplator.UI.Business
             { "ROW","<tr #attr# >#Val#<tr>"},
             { "CELL","<td #attr# style='border:1px solid #655678'>#Val#</td>"},
             { "LABEL","<span #attr# >#Val#</span>"},
-            { "FIELD","<label #attr#> #Val#></label>"},
+            { "FIELD","<label #attr#> #Val#</label>"},
             { "IMAGE","<img #attr# />"},
             { "IMAGESUB","<div><label #lattr# #lVal#></label><img #attr# /></div>"},
             { "EMPTY","<span #attr# >&nbsp;</span>"}

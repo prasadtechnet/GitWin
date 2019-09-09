@@ -107,5 +107,14 @@ Cell Border
 	 10.Generate Pdf .cs File
 	 11.Generate Model .cs File
 
+	 --------------------------------------------------
+	 9-9-2019
+	 1.Merge cells
+	 2.Dynamic Table in UI and backend
+	 3.HTML style in webbrowser control
+	 4.child Table logic
+	 5.Test all formats
+
+
     
 

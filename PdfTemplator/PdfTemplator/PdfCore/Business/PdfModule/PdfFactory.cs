@@ -529,7 +529,7 @@ namespace PdfTemplator.PdfCore.Business.PdfModule
                       "\""+ objImage.label.Text+"\"",
                     "\""+ objImage.label.Font.FontFamily+"\"",
                      objImage.label.Font.FontSize+"f",
-                     objImage.Sclae+"f",
+                     objImage.Scale+"f",
                      objImage.Height+"f",
                      objImage.label.Height+"f",
                      GetFontWeight(objImage.label.Font.FontWeight),
