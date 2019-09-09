@@ -10,7 +10,7 @@ namespace PdfTemplator.UI.PropertyGridClass
    public class EmptyCellGridClass
     {
         [CategoryAttribute("Empty Cell Info"), DescriptionAttribute("Empty Cell Name")]
-        public string Name { get; set; } = "tr";
+        public string Name { get; set; } = "";
         [CategoryAttribute("Empty Cell Info"), DescriptionAttribute("ControlType")]
         public string ControlType { get; set; } = "Empty";
     }

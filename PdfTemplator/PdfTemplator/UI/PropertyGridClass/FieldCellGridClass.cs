@@ -22,7 +22,7 @@ namespace PdfTemplator.UI.PropertyGridClass
         [CategoryAttribute("Field Style"), DescriptionAttribute("Field Color"), DisplayName("Color")]
         public Color FieldColor { get; set; }
 
-        [CategoryAttribute("Binding Model"), DescriptionAttribute("Field Color"), DisplayName("Binding Property")]
+        [CategoryAttribute("Binding Model"), DescriptionAttribute("Field Color"), DisplayName("Model Name")]
         public string FieldModel { get; set; }
 
         [CategoryAttribute("Field Style"), DescriptionAttribute("Field Height"), DisplayName("Height")]

@@ -12,8 +12,8 @@ namespace PdfTemplator.UI.PropertyGridClass
     {
         [CategoryAttribute("Table Info"), DescriptionAttribute("Table Name")]
         public string Name { get; set; }
-        [CategoryAttribute("Table Info"), DescriptionAttribute("ControlType")]
-        public string ControlType { get; set; } = "table";
+        [CategoryAttribute("Table Info"), DescriptionAttribute("ControlType"),ReadOnly(true)]
+        public string ControlType { get; set; } = "Table";
 
         [CategoryAttribute("Table Column"), DescriptionAttribute("Number of Columns"),DisplayName("No Of Columns")]
         public int NoOfColumn  { get; set; }

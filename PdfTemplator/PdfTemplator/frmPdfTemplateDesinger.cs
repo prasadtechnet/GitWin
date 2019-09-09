@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using PdfTemplator.UI.Business;
 using PdfTemplator.UI.Master;
 using PdfTemplator.UI.Models;
 using PdfTemplator.UI.PropertyGridClass;
@@ -17,6 +18,8 @@ namespace PdfTemplator
     {
         #region Varaibles
         TreeNode _tempNode = null;
+        bool _blIsNewControl = false;
+        List<GridModelProperty> lsModels = null;
         #endregion
 
         #region Constructor & Load   
@@ -45,6 +48,9 @@ namespace PdfTemplator
                         TreeViewInitilise(lbTemplate.SelectedItem.ToString());
                         EnableTreeView(true);
 
+                        lsModels = new List<GridModelProperty>();
+                        dgvModels.Rows.Clear();
+
                         btnProceed.Enabled = false;
                     }
                     else
@@ -69,9 +75,11 @@ namespace PdfTemplator
                 ShowPropertyGrid(false);
 
                 EnableTreeView(false);
+                lsModels = new List<GridModelProperty>();
+                dgvModels.Rows.Clear();
 
                 tvDocument.Nodes.Clear();
-                tvModels.Nodes.Clear();
+           
                 wbTemplate.DocumentText = "";
                 btnProceed.Enabled = true;
             }
@@ -108,17 +116,16 @@ namespace PdfTemplator
 
         private void btnAddControlProperty_Click(object sender, EventArgs e)
         {
+            _blIsNewControl = true;
+            btnPropertyAdd.Text = "Add";
             var lsDirectAddControls = Master.DirectAddingControls();
             if (lbControlTypes.SelectedItem != null)
             {
                 if (!lsDirectAddControls.Contains(lbControlTypes.SelectedItem.ToString()))
                 {
                     //Open Property grid for inputs
-
-                    TableGridClass objTab = new TableGridClass();
-                    objTab.Name = "";
-
-                    pgControlProps.SelectedObject = objTab;
+                    
+                    pgControlProps.SelectedObject = PropertyGridManager.GetPropertyGridObject(lbControlTypes.SelectedItem.ToString());
 
                     ShowPropertyGrid(true);
 
@@ -126,6 +133,38 @@ namespace PdfTemplator
                 else
                 {
                     //directly add to treeview
+                    if (tvDocument.SelectedNode != null)
+                    {
+                        if (lbControlTypes.SelectedItem.ToString() == "Empty")
+                        {
+                            AddTreeNodeToDocument(PrepareTreeNode("Empty", new ControlPropertyModel { ControlType = "Row",Properties=new EmptyCellGridClass {Name=""} }));
+                        }
+                        else if (lbControlTypes.SelectedItem.ToString() == "Row")
+                        {
+                            if (tvDocument.SelectedNode.Tag != null)
+                            {
+                                var objColumns = ((tvDocument.SelectedNode.Tag as ControlPropertyModel).Properties as TableGridClass).NoOfColumn;
+                                if (objColumns > 0)
+                                {
+                                    var lsTds = new List<TreeNode>();
+                                    for (int i = 0; i < objColumns; i++)
+                                    {
+                                        lsTds.Add(new TreeNode("td") { Tag = new ControlPropertyModel { ControlType = "Cell",Properties=new CellGridCalss { } } });
+                                    }
+
+                                    AddTreeNodeToDocument(PrepareTreeNode("Row", new ControlPropertyModel { ControlType = "Row",Properties=new RowGridClass { } },lsTds));
+                                }
+                                else
+                                    MessageBox.Show("Parent table should have atleast one column");
+
+                            }
+                            else
+                                MessageBox.Show("Parent should be table");
+                        }
+
+
+                    }
+
                 }
             }
             else
@@ -150,27 +189,63 @@ namespace PdfTemplator
         private void btnPropertyAdd_Click(object sender, EventArgs e)
         {
             var objControl=pgControlProps.SelectedObject;
-            if (lbControlTypes.SelectedItem.ToString() == "Table")
+            if (_blIsNewControl)
             {
-                //insitilise row with cells
-                var objTab = objControl as TableGridClass;
-                if (objTab.NoOfColumn >0)
+
+                if (lbControlTypes.SelectedItem.ToString() == "Table")
                 {
-                    var lsTds = new List<TreeNode>();
-                    for (int i = 0; i < objTab.NoOfColumn; i++)
+                    //insitilise row with cells
+                    var objTab = objControl as TableGridClass;
+                    if (objTab.NoOfColumn > 0)
                     {
-                        lsTds.Add(new TreeNode("td") { Tag = new ControlPropertyModel { ControlType = "td" } });
+                        var lsTds = new List<TreeNode>();
+                        for (int i = 0; i < objTab.NoOfColumn; i++)
+                        {
+                            lsTds.Add(new TreeNode("Cell") { Tag = new ControlPropertyModel { ControlType = "Cell", Properties = new CellGridCalss { } } });
+                        }
+
+                        AddTreeNodeToDocument(PrepareTreeNode("Table", new ControlPropertyModel { ControlType = "Table", Properties = objTab }, new List<TreeNode> { PrepareTreeNode("Row", new ControlPropertyModel { ControlType = "Row", Properties = new RowGridClass { } }, lsTds) }));
+                    }
+                    else
+                        MessageBox.Show("Parent table should have atleast one column");
+                }
+                else
+                {
+                  
+
+                    AddTreeNodeToDocument(PrepareTreeNode(lbControlTypes.SelectedItem.ToString(), new ControlPropertyModel { ControlType = lbControlTypes.SelectedItem.ToString(), Properties = objControl }));
+
+                    var modelFieldInfo = PropertyGridManager.GetModelFieldName(new ControlPropertyModel { ControlType = lbControlTypes.SelectedItem.ToString(), Properties = objControl });
+                    if (modelFieldInfo != "")
+                    {
+                        var flds = modelFieldInfo.Split('-');
+                        if(lsModels.Where(x=>x.ModelName==flds[0] && x.FieldName == flds[1]).FirstOrDefault() == null)
+                        {
+                            lsModels.Add(new GridModelProperty {ModelName=flds[0],FieldName=flds[1]});
+                            RefreshModelGrid();
+                        }
                     }
 
-                    AddTreeNodeToDocument(PrepareTreeNode("Table", objTab, new List<TreeNode> { PrepareTreeNode("Row", new ControlPropertyModel { ControlType = "tr" }, lsTds) }));
                 }
+
+                // AddTreeNodeToDocument(lbControlTypes.SelectedItem.ToString(), objControl);
             }
             else
             {
-                AddTreeNodeToDocument(PrepareTreeNode(lbControlTypes.SelectedItem.ToString(), new ControlPropertyModel { ControlType = "td",Properties= objControl }  ));
+                //Update properties
+                if (tvDocument.SelectedNode != null)
+                {
+                    var objControlUpdateObject = (tvDocument.SelectedNode.Tag as ControlPropertyModel);
+                    objControlUpdateObject.Properties=pgControlProps.SelectedObject;
+
+                    tvDocument.SelectedNode.Tag = objControlUpdateObject;
+
+                    ShowPropertyGrid(false);
+                }
+
             }
 
-           // AddTreeNodeToDocument(lbControlTypes.SelectedItem.ToString(), objControl);
+            lbControlTypes.ClearSelected();
 
         }
 
@@ -199,13 +274,22 @@ namespace PdfTemplator
             btnPropertyCancel.Visible = blShow;
             pgControlProps.Visible = blShow;
         }
+
+        private void RefreshModelGrid()
+        {
+            dgvModels.Rows.Clear();
+            dgvModels.DataSource = lsModels;
+            dgvModels.Refresh();
+        }
         #endregion
 
         #region View and Final Process
 
         private void btnHtmlPreview_Click(object sender, EventArgs e)
         {
-
+            HTMLPreviewModule objHtml = new HTMLPreviewModule();
+           var strRes=objHtml.GetHTMLTemplate(tvDocument);
+            wbTemplate.DocumentText = strRes;
         }
 
         private void btnSamplePdf_Click(object sender, EventArgs e)
@@ -277,7 +361,30 @@ namespace PdfTemplator
                 MessageBox.Show("Please select parent node");
         }
 
+        private void btnNodeProperties_Click(object sender, EventArgs e)
+        {
+            _blIsNewControl = false;
+            btnPropertyAdd.Text = "Update";
+
+            if (tvDocument.SelectedNode != null)
+            {
+                var lsSec = Master.GetSections(lbTemplate.SelectedItem.ToString());
+                if (!lsSec.Contains(tvDocument.SelectedNode.Text))
+                {
+                   
+                    var objControl = (tvDocument.SelectedNode.Tag as ControlPropertyModel);
+                    pgControlProps.SelectedObject = objControl.Properties;
+                    ShowPropertyGrid(true);
+                }
+                else
+                    MessageBox.Show("Sorry, sections will not have props");
+               
+            }
+            else
+                MessageBox.Show("Please select node");
+        }
         #endregion
-      
+
+
     }
 }

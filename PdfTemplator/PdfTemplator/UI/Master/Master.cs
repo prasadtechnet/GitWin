@@ -8,16 +8,7 @@ namespace PdfTemplator.UI.Master
 {
     public static class Master
     {
-        public static Dictionary<string, string> htmlTagDictionary = new Dictionary<string, string>
-        {
-            { "Table","table"},
-            { "Row","tr"},
-            { "Cell","td"},
-            { "Label","span"},
-            { "Field","label"},
-            { "Image","img"}
-            
-        };
+       
         private static Dictionary<string, int> AlignmentDictionary = new Dictionary<string, int>
         {
             { "ALIGN_LEFT",0},
