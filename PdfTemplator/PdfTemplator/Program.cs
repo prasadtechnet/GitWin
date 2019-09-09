@@ -16,7 +16,7 @@ namespace PdfTemplator
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new frmPdf());
+            Application.Run(new Form2());
         }
     }
 }
