@@ -93,9 +93,11 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UI\Business\HTMLPreviewModule.cs" />
     <Compile Include="UI\Business\PropertyGridManager.cs" />
+    <Compile Include="UI\Business\TemplateInputGenerator.cs" />
     <Compile Include="UI\Master\Master.cs" />
     <Compile Include="UI\Models\ControlPropertyModel.cs" />
     <Compile Include="UI\Models\GridModel.cs" />
+    <Compile Include="UI\PropertyGridClass\DocumentGridModel.cs" />
     <Compile Include="UI\PropertyGridClass\EmptyCellGridClass.cs" />
     <Compile Include="UI\PropertyGridClass\Enums.cs" />
     <Compile Include="UI\PropertyGridClass\FieldCellGridClass.cs" />

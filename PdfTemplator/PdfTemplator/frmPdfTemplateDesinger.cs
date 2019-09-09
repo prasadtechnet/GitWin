@@ -44,14 +44,18 @@ namespace PdfTemplator
                 {
                     if (txtTemplate_Namespace.Text != "")
                     {
+                        if (txtLocation.Text != "")
+                        {
+                            TreeViewInitilise(lbTemplate.SelectedItem.ToString());
+                            EnableTreeView(true);
 
-                        TreeViewInitilise(lbTemplate.SelectedItem.ToString());
-                        EnableTreeView(true);
+                            lsModels = new List<GridModelProperty>();
+                            dgvModels.Rows.Clear();
 
-                        lsModels = new List<GridModelProperty>();
-                        dgvModels.Rows.Clear();
-
-                        btnProceed.Enabled = false;
+                            btnProceed.Enabled = false;
+                        }
+                        else
+                            MessageBox.Show("Please provide location to save");
                     }
                     else
                         MessageBox.Show("Please provide namesapce");
@@ -94,10 +98,10 @@ namespace PdfTemplator
                 var lsTN = new List<TreeNode>();
                 foreach (var sec in lsSecs)
                 {
-                    lsTN.Add(new TreeNode(sec) { Tag = new ControlPropertyModel { ControlType = "SECTION" } });
+                    lsTN.Add(new TreeNode(sec) { Tag = new ControlPropertyModel { ControlType = "SECTION",Properties=new SectionModel { Name=sec} } });
                 }
 
-                tvDocument.Nodes.Add(new TreeNode("Document", lsTN.ToArray()) { Tag = new ControlPropertyModel { ControlType = "DOCUMENT" } });
+                tvDocument.Nodes.Add(new TreeNode("Document",lsTN.ToArray()) { Tag = new ControlPropertyModel { ControlType = "DOCUMENT",Properties=new DocumentGridModel {Template=lbTemplate.SelectedItem.ToString(),Name=txtTemplate_Name.Text,Namespace=txtTemplate_Namespace.Text,Location=txtLocation.Text} } });
                 tvDocument.ExpandAll();
             }
         }

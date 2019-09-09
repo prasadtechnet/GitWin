@@ -14,6 +14,7 @@ namespace PdfTemplator.PdfCore.Models.Pdf
         public string Name { get; set; }
         public string NameSpace { get; set; }
         public string Type { get; set; }
+        public string Location { get; set; }
         public List<ModelInfoModel> ModelVariables { get; set; }
         public List<BindingModel> bindingModelProps { get; set; }
     }

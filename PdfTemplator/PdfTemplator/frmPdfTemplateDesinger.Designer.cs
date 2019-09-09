@@ -37,7 +37,7 @@
             this.btnRemoveNode = new System.Windows.Forms.Button();
             this.btnBrowsePath = new System.Windows.Forms.Button();
             this.label4 = new System.Windows.Forms.Label();
-            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.txtLocation = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.txtTemplate_Namespace = new System.Windows.Forms.TextBox();
@@ -110,7 +110,7 @@
             this.panel2.Controls.Add(this.pnlTreeViewContainer);
             this.panel2.Controls.Add(this.btnBrowsePath);
             this.panel2.Controls.Add(this.label4);
-            this.panel2.Controls.Add(this.textBox1);
+            this.panel2.Controls.Add(this.txtLocation);
             this.panel2.Controls.Add(this.label2);
             this.panel2.Controls.Add(this.label1);
             this.panel2.Controls.Add(this.txtTemplate_Namespace);
@@ -185,13 +185,13 @@
             this.label4.TabIndex = 8;
             this.label4.Text = "Location";
             // 
-            // textBox1
+            // txtLocation
             // 
-            this.textBox1.Location = new System.Drawing.Point(218, 108);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(188, 20);
-            this.textBox1.TabIndex = 7;
-            this.textBox1.Text = "D:\\";
+            this.txtLocation.Location = new System.Drawing.Point(218, 108);
+            this.txtLocation.Name = "txtLocation";
+            this.txtLocation.Size = new System.Drawing.Size(188, 20);
+            this.txtLocation.TabIndex = 7;
+            this.txtLocation.Text = "D:\\";
             // 
             // label2
             // 
@@ -508,7 +508,7 @@
         private System.Windows.Forms.Button btnHtmlPreview;
         private System.Windows.Forms.Button btnBrowsePath;
         private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.TextBox txtLocation;
         private System.Windows.Forms.Button btnRemoveNode;
         private System.Windows.Forms.Panel pnlTreeViewContainer;
         private System.Windows.Forms.Button btnNodePaste;
