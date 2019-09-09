@@ -9,14 +9,14 @@ namespace PdfTemplator.UI.Master
     public static class Master
     {
        
-        private static Dictionary<string, int> AlignmentDictionary = new Dictionary<string, int>
+        private static Dictionary<PropertyGridClass.Alignment, int> AlignmentDictionary = new Dictionary<PropertyGridClass.Alignment, int>
         {
-            { "ALIGN_LEFT",0},
-            { "ALIGN_CENTER",1},
-            { "ALIGN_RIGHT",2},
-            { "ALIGN_TOP",4},
-            { "ALIGN_MIDDLE",5},
-            { "ALIGN_BOTTOM",6}
+            {PropertyGridClass.Alignment.ALIGN_LEFT,0},
+            { PropertyGridClass.Alignment.ALIGN_CENTER,1},
+            { PropertyGridClass.Alignment.ALIGN_RIGHT,2},
+            { PropertyGridClass.Alignment.ALIGN_TOP,4},
+            { PropertyGridClass.Alignment.ALIGN_MIDDLE,5},
+            { PropertyGridClass.Alignment.ALIGN_BOTTOM,6}
         };
         public static List<string> GetSections(string template)
         {
@@ -66,7 +66,7 @@ namespace PdfTemplator.UI.Master
             };
         }
 
-        public static int GetAlignmentNumber(string Name)
+        public static int GetAlignmentNumber(PropertyGridClass.Alignment Name)
         {
             return AlignmentDictionary[Name];
         }

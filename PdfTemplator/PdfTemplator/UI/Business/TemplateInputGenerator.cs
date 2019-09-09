@@ -110,22 +110,60 @@ namespace PdfTemplator.UI.Business
             var cell = new CellModel { };
             try
             {
+                
                 var contM = (tNode.Tag as ControlPropertyModel);
                 switch (contM.ControlType.ToUpper())
                 {
                   
                     case "LABEL":
                        var objlbl = contM.Properties as LabelCellGridClass;
+                        var parentLabel = (tNode.Parent.Tag as ControlPropertyModel).Properties as CellGridCalss;
+                        cell = new LabelCell {
+                            Text=objlbl.Name,
+                            Font=new FontModel {FontFamily=objlbl.LabelFont.FontFamily.Name,FontSize=objlbl.LabelFont.Size },
+                            Color=new ColorModel { Type="RGB",Blue=objlbl.LabelColor.B,Green=objlbl.LabelColor.G,Red=objlbl.LabelColor.R},
+                            ColSpan=parentLabel.ColSpan,
+                            RowSpan=parentLabel.RowSpan,
+                            PTop=parentLabel.PTop,
+                            PBottom = parentLabel.PBottom,
+                            PLeft = parentLabel.PLeft,
+                            PRight = parentLabel.PRight,
+                            BorderPattren=parentLabel.BorderPattren.ToString().Replace("-",","),
+                            ContentType="",
+                            HAlign= Master.Master.GetAlignmentNumber(parentLabel.HAlign),
+                            VAlign = Master.Master.GetAlignmentNumber(parentLabel.VAlign),
+                            Height=objlbl.Height                           
+                        };
+                       
                         break;
                     case "FIELD":
                         var objfld = contM.Properties as FieldCellGridClass;
+                        var parentField = (tNode.Parent.Tag as ControlPropertyModel).Properties as CellGridCalss;
+                        cell = new FieldCell
+                        {
+                            DataFieldName = objfld.Name,
+                            ModelName=objfld.FieldModel,
+                            Font = new FontModel { FontFamily = objfld.FieldFont.FontFamily.Name, FontSize = objfld.FieldFont.Size },
+                            Color = new ColorModel { Type = "RGB", Blue = objfld.FieldColor.B, Green = objfld.FieldColor.G, Red = objfld.FieldColor.R },
+                            ColSpan = parentField.ColSpan,
+                            RowSpan = parentField.RowSpan,
+                            PTop = parentField.PTop,
+                            PBottom = parentField.PBottom,
+                            PLeft = parentField.PLeft,
+                            PRight = parentField.PRight,
+                            BorderPattren = parentField.BorderPattren.ToString().Replace("-", ","),
+                            ContentType = "",
+                            HAlign = Master.Master.GetAlignmentNumber(parentField.HAlign),
+                            VAlign = Master.Master.GetAlignmentNumber(parentField.VAlign),
+                            Height = objlbl.Height
+                        };
                         break;
                     case "EMPTY":
                         var objempty = contM.Properties as EmptyCellGridClass;
                         break;
                     case "TABLE":
-                        var objtbl = contM.Properties as TableGridClass;
-                        PrepareMainTable(tNode.Nodes[0]);
+                        //var objtbl = contM.Properties as TableGridClass;
+                        //PrepareMainTable(tNode.Nodes[0]);
                         break;
                     case "IMAGEURL":
                         var objimgUrl = contM.Properties as ImageUrlCellGridClass;
