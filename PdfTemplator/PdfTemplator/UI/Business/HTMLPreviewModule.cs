@@ -2,6 +2,7 @@
 using PdfTemplator.UI.PropertyGridClass;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -94,7 +95,7 @@ namespace PdfTemplator.UI.Business
                         }
 
                         strlblTab = strlblTab.Replace("#Val#", strChildTab);
-                        strlblTab = strlblTab.Replace("#attr#", "");
+                        strlblTab = strlblTab.Replace("#attr#", GetAttr(objTab.width.ToString(),"","","","","",null,null,null,"","","","","","",objTab.spaceBefore.ToString(),objTab.spaceAfter.ToString()));
                         strRes = strlblTab;
 
                         break;
@@ -113,7 +114,7 @@ namespace PdfTemplator.UI.Business
                                 strChildRow = String.Join("<br/>", lsItems.ToArray());
 
                         }
-
+                        
                         strlblRow = strlblRow.Replace("#Val#", strChildRow);
                         strlblRow = strlblRow.Replace("#attr#", "");
                         strRes = strlblRow;
@@ -137,21 +138,21 @@ namespace PdfTemplator.UI.Business
                         }
                        
                         strlblCell = strlblCell.Replace("#Val#", strChildCell);
-                        strlblCell = strlblCell.Replace("#attr#", "");
+                        strlblCell = strlblCell.Replace("#attr#", GetAttr("", "", objCell.HAlign.ToString(), objCell.VAlign.ToString(), objCell.RowSpan.ToString(), objCell.ColSpan.ToString(), null, null, null, objCell.PLeft.ToString(), objCell.PRight.ToString(), objCell.PTop.ToString(), objCell.PBottom.ToString(), "", "","", ""));
                         strRes = strlblCell;
                         break;
                     case "LABEL":
                         var objlbl = ctrl.Properties as LabelCellGridClass;
                         var strlbl = htmlTagDictionary["LABEL"];
                         strlbl = strlbl.Replace("#Val#", objlbl.Name);
-                        strlbl = strlbl.Replace("#attr#", "");
+                        strlbl = strlbl.Replace("#attr#", GetAttr("", objlbl.Height.ToString(), "", "", "", "", objlbl.LabelFont, objlbl.LabelColor, null, "", "", "", "", "", "", "", ""));
                         strRes = strlbl;
                         break;
                     case "FIELD":
                         var objfld = ctrl.Properties as FieldCellGridClass;
                         var strFld = htmlTagDictionary["FIELD"];
                         strFld = strFld.Replace("#Val#", objfld.FieldModel + "." + objfld.Name);
-                        strFld = strFld.Replace("#attr#", "");
+                        strFld = strFld.Replace("#attr#", GetAttr("", objfld.Height.ToString(), "", "", "", "", objfld.FieldFont, objfld.FieldColor, null, "", "", "", "", "", "", "", ""));
                         strRes = strFld;
                         break;
                     case "EMPTY":
@@ -164,30 +165,30 @@ namespace PdfTemplator.UI.Business
                     case "IMAGEURL":
                         var objIUrl = ctrl.Properties as ImageUrlCellGridClass;
                         var strImgU = htmlTagDictionary["IMAGE"];                       
-                        strImgU = strImgU.Replace("#attr#", "Src='"+objIUrl.Src+"'");
+                        strImgU = strImgU.Replace("#attr#", "Src='"+objIUrl.Src+"' "+ GetAttr("", objIUrl.Height.ToString(), "", "", "", "",null, null, null, "", "", "", "", "", "", "", ""));
 
                         strRes = strImgU;
                         break;
                     case "IMAGEBYTE":
                         var objIByte = ctrl.Properties as ImageByteCellGridClass;
                         var strImgB = htmlTagDictionary["IMAGE"];                      
-                        strImgB = strImgB.Replace("#attr#", "Src=''");
+                        strImgB = strImgB.Replace("#attr#", "Src='' "+ GetAttr("", objIByte.Height.ToString(), "", "", "", "",null, null, null, "", "", "", "", "", "", "", ""));
                         strRes = strImgB;
                         break;
                     case "IMAGESUBURL":
                         var objISUrl = ctrl.Properties as ImageSubUrlCellGridClass;
                         var strlblImgU = htmlTagDictionary["IMAGESUB"];
                         strlblImgU = strlblImgU.Replace("#Val#", objISUrl.LabelName);
-                        strlblImgU = strlblImgU.Replace("#lattr#", "");
-                        strlblImgU = strlblImgU.Replace("#attr#", "Src=''");
+                        strlblImgU = strlblImgU.Replace("#lattr#", GetAttr("", objISUrl.LabelHeight.ToString(), "", "", "", "", objISUrl.LabelFont, objISUrl.LabelColor, null, "", "", "", "", "", "", "", ""));
+                        strlblImgU = strlblImgU.Replace("#attr#", "Src='' " + GetAttr("", objISUrl.Height.ToString(), "", "", "", "", null,null, null, "", "", "", "", "", "", "", ""));
                         strRes = strlblImgU;
                         break;
                     case "IMAGESUBBYTE":
                         var objISByte = ctrl.Properties as ImageSubByteCellGridClass;
                         var strIlbl = htmlTagDictionary["IMAGESUB"];
                         strIlbl = strIlbl.Replace("#lVal#", objISByte.LabelName);
-                        strIlbl = strIlbl.Replace("#lattr#", "");
-                        strIlbl = strIlbl.Replace("#attr#", "Src=''");
+                        strIlbl = strIlbl.Replace("#lattr#", GetAttr("", objISByte.LabelHeight.ToString(), "", "", "", "", objISByte.LabelFont, objISByte.LabelColor, null, "", "", "", "", "", "", "", ""));
+                        strIlbl = strIlbl.Replace("#attr#", "Src='' " + GetAttr("", objISByte.Height.ToString(), "", "", "", "", null,null, null, "", "", "", "", "", "", "", ""));
                         strRes = strIlbl;
                         break;
                 }
@@ -199,6 +200,127 @@ namespace PdfTemplator.UI.Business
             return strRes;
         }
 
+        private string GetAttributes(ControlPropertyModel objCT)
+        {
+            var strRes = "";
 
+            try
+            {
+                switch (objCT.ControlType.ToUpper())
+                {
+                    case "SECTION":                      
+
+                        strRes = "";
+                        break;
+                    case "TABLE":
+
+                        strRes = "";
+                        break;
+                    case "ROW":
+
+                        strRes = "";
+                        break;
+                    case "CELL":
+
+                        strRes = "";
+                        break;
+                    case "LABEL":
+                        strRes = "";
+                        break;
+                    case "FIELD":
+                        strRes = "";
+                        break;
+                    case "EMPTY":
+                        strRes = "";
+                        break;
+                    case "IMAGEURL":
+                        strRes = "";
+                        break;
+                    case "IMAGEBYTE":
+                        strRes = "";
+                        break;
+                    case "IMAGESUBURL":
+                        strRes = "";
+                        break;
+                    case "IMAGESUBBYTE":
+                        strRes = "";
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+            }
+
+            return strRes;
+        }
+
+        private string GetAttr(string width="",string height="",string halign="",string valign="",string rowspan="",string colspan="",Font font=null, Color? color =null,Color? bgColor=null,string pLeft="", string pRight="", string pTop="", string pBottom="", string mLeft = "", string mRight = "", string mTop = "", string mBottom = "")
+        {
+            var strRes = "";
+            try
+            {
+                var lsAttr = new List<string>();
+                var lsStyle = new List<string>();
+
+                if (!String.IsNullOrEmpty(width))
+                    lsStyle.Add("width:"+width+" px");
+                if (!String.IsNullOrEmpty(height))
+                    lsStyle.Add("height:" + height + " px");
+
+                if (!String.IsNullOrEmpty(halign))
+                    lsStyle.Add("text-align:"+(halign.Replace("ALIGN_", "").ToLower()));
+
+                if (!String.IsNullOrEmpty(valign))
+                    lsStyle.Add("vertical-align:" + (halign.Replace("ALIGN_", "").ToLower()));
+
+                if (!String.IsNullOrEmpty(pLeft))
+                    lsStyle.Add("padding-left:"+pLeft + " px");
+                if (!String.IsNullOrEmpty(pRight))
+                    lsStyle.Add("padding-right:"+ pRight + " px");
+
+                if (!String.IsNullOrEmpty(pTop))
+                    lsStyle.Add("padding-top:"+pTop + " px");
+                if (!String.IsNullOrEmpty(pBottom))
+                    lsStyle.Add("padding-bottom:"+pBottom + " px");
+              
+                //Margin
+                if (!String.IsNullOrEmpty(mLeft))
+                    lsStyle.Add("margin-left:" + mLeft + " px");
+                if (!String.IsNullOrEmpty(mRight))
+                    lsStyle.Add("margin-right:" + mRight + " px");
+                if (!String.IsNullOrEmpty(mTop))
+                    lsStyle.Add("margin-top:" + mTop + " px");
+                if (!String.IsNullOrEmpty(mBottom))
+                    lsStyle.Add("margin-bottom:" + mBottom + " px");
+
+
+                if (font != null)
+                {
+                    lsStyle.Add("font-family:"+font.FontFamily.Name);
+                    lsStyle.Add("font-size:"+font.Size+"px");
+                    if(font.Bold)
+                     lsStyle.Add("font-weight:bold");
+                }
+                if (color!=null)
+                    lsStyle.Add("color:" + System.Drawing.ColorTranslator.ToHtml(color.Value));
+                if (bgColor != null)
+                    lsStyle.Add("background-color:" + System.Drawing.ColorTranslator.ToHtml(color.Value));
+
+                if (!String.IsNullOrEmpty(rowspan))
+                    lsAttr.Add(" rowspan=\""+rowspan+"\"");
+                if (!String.IsNullOrEmpty(colspan))
+                    lsAttr.Add(" colspan=\"" + colspan + "\"");
+
+                if (lsAttr.Count > 0)
+                    strRes=  String.Join("  ", lsAttr.ToArray());
+
+                if (lsStyle.Count > 0)
+                    strRes= strRes+" Style=\""+ String.Join(";", lsStyle.ToArray())+"\"";
+            }
+            catch (Exception ex)
+            {
+            }
+            return strRes;
+        }
     }
 }

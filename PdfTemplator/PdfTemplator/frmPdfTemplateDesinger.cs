@@ -21,6 +21,9 @@ namespace PdfTemplator
         TreeNode _tempNode = null;
         bool _blIsNewControl = false;
         List<GridModelProperty> lsModels = null;
+        TreeView tv2 = new TreeView();
+        ContextMenu cmCell = null;
+
         #endregion
 
         #region Constructor & Load   
@@ -32,6 +35,9 @@ namespace PdfTemplator
         private void frmPdfTemplateDesinger_Load(object sender, EventArgs e)
         {
             EnableTreeView(false);
+            cmCell = new ContextMenu { Name="CellMenu" };
+            cmCell.MenuItems.Add(new MenuItem("MergeUp", new EventHandler(MergeCellWithTop)));
+            cmCell.MenuItems.Add(new MenuItem("MergeDown", new EventHandler(MergeCellWithDown)));
         }
         #endregion
         
@@ -81,7 +87,9 @@ namespace PdfTemplator
 
                 EnableTreeView(false);
                 lsModels = new List<GridModelProperty>();
-                dgvModels.Rows.Clear();
+
+                if(dgvModels.Rows.Count>0)
+                    dgvModels.Rows.Clear();
 
                 tvDocument.Nodes.Clear();
            
@@ -206,7 +214,7 @@ namespace PdfTemplator
                         var lsTds = new List<TreeNode>();
                         for (int i = 0; i < objTab.NoOfColumn; i++)
                         {
-                            lsTds.Add(new TreeNode("Cell") { Tag = new ControlPropertyModel { ControlType = "Cell", Properties = new CellGridCalss { } } });
+                            lsTds.Add(new TreeNode("Cell") { Tag = new ControlPropertyModel { ControlType = "Cell", Properties = new CellGridCalss { } },ContextMenu= cmCell });
                         }
 
                         AddTreeNodeToDocument(PrepareTreeNode("Table", new ControlPropertyModel { ControlType = "Table", Properties = objTab }, new List<TreeNode> { PrepareTreeNode("Row", new ControlPropertyModel { ControlType = "Row", Properties = new RowGridClass { } }, lsTds) }));
@@ -241,6 +249,9 @@ namespace PdfTemplator
                 if (tvDocument.SelectedNode != null)
                 {
                     var objControlUpdateObject = (tvDocument.SelectedNode.Tag as ControlPropertyModel);
+
+                    
+
                     objControlUpdateObject.Properties=pgControlProps.SelectedObject;
 
                     tvDocument.SelectedNode.Tag = objControlUpdateObject;
@@ -260,6 +271,8 @@ namespace PdfTemplator
 
             if (lsChilds != null)
                 tNode = new TreeNode(ControlType, lsChilds.ToArray());
+
+            
 
             tNode.Tag = TagData;
             
@@ -346,6 +359,8 @@ namespace PdfTemplator
                 {
                     if (!lsSec.Contains(tvDocument.SelectedNode.Text))
                     {
+                   // tv2.Nodes.Add((TreeNode)tvDocument.SelectedNode.Clone());
+
                         _tempNode = (TreeNode)tvDocument.SelectedNode.Clone();
                     }
                     else
@@ -362,10 +377,18 @@ namespace PdfTemplator
         {
             if (tvDocument.SelectedNode != null)
             {
+              
                 if (_tempNode != null)
                 {
-                    tvDocument.SelectedNode.Nodes.Add(_tempNode);
-                    _tempNode = null;
+                    //create New Nodes
+                    
+
+                    tvDocument.SelectedNode.Nodes.Add(CopyNewNode(_tempNode));
+                 
+
+                  tvDocument.SelectedNode = null;
+
+                   _tempNode = null;
                 }
                 else
                     MessageBox.Show("Please copy node first");
@@ -396,8 +419,103 @@ namespace PdfTemplator
             else
                 MessageBox.Show("Please select node");
         }
+
+
+        private TreeNode CopyNewNode(TreeNode tnSrc)
+        {
+            var tnNew = new TreeNode();
+            try
+            {
+              
+                if (tnSrc.Nodes.Count > 0)
+                {
+                    var lsTNs = new List<TreeNode>();
+                    foreach (TreeNode tn in tnSrc.Nodes)
+                    {
+                        lsTNs.Add(CopyNewNode(tn));
+                    }
+                    var oldTag = tnSrc.Tag as ControlPropertyModel;
+                    var cp = oldTag.ControlType;
+                    var objNewCP = new ControlPropertyModel {ControlType= cp, Properties= PropertyGridManager.GetPropertyGridObject(cp) };
+
+                    tnNew = new TreeNode(tnSrc.Text, lsTNs.ToArray()) { Tag = objNewCP, Name=tnSrc.Text };
+                }
+                else
+                {
+                    var oldTag = tnSrc.Tag as ControlPropertyModel;
+                    var cp = oldTag.ControlType;
+                    var objNewCP = new ControlPropertyModel { ControlType = cp, Properties = PropertyGridManager.GetPropertyGridObject(cp) };
+                    tnNew = new TreeNode(tnSrc.Text) { Tag = objNewCP, Name = tnSrc.Text };
+                }
+
+               
+            }
+            catch (Exception ex)
+            {
+
+            }
+
+            return tnNew;
+        }
+
+
         #endregion
 
+        #region Context Menu Event handler
 
+        protected void MergeCellWithTop(object sender, EventArgs e)
+        {
+            var t1 = tvDocument.SelectedNode;
+
+            if (t1.PrevNode != null)
+            {
+                var t2 = t1.PrevNode;
+                var res = MergeNodes(t1, t2);
+                if (res != null)
+                {
+                   
+                    tvDocument.SelectedNode = res;
+                    tvDocument.SelectedNode.PrevNode.Remove();
+                }
+            } else
+                MessageBox.Show("There is no top node");
+            
+
+
+        }
+        protected void MergeCellWithDown(object sender, EventArgs e)
+        {
+            var t1 = tvDocument.SelectedNode;
+            if (t1.PrevNode != null)
+            {
+                var t2 = t1.NextNode;
+                var res = MergeNodes(t1, t2);
+                if (res != null)
+                {
+                    tvDocument.SelectedNode = res;
+                    tvDocument.SelectedNode.NextNode.Remove();
+                }
+            }
+            else
+                MessageBox.Show("There is no below node");
+
+        }
+
+
+        private TreeNode MergeNodes(TreeNode current,TreeNode mergewith)
+        {
+            TreeNode tn=null;
+            try
+            {
+                current
+            }
+            catch (Exception ex)
+            {
+
+            }
+
+            return tn;
+        }
+        #endregion
     }
 }
