@@ -109,10 +109,10 @@ Cell Border
 
 	 --------------------------------------------------
 	 9-9-2019
-	 1.Merge cells & copy cell behave diffrently if node update others also updated
-	 2.Dynamic Table in UI and backend
-	 3.HTML style in webbrowser control-90% complete except border & table cell width
-	 4.child Table logic
+	 1.Merge cells & copy cell behave diffrently if node update others also updated--- done
+	 2.Dynamic Table in UI and backend  -ok
+	 3.child Table logic -ok
+	 4.HTML style in webbrowser control-90% complete except border & table cell width	 
 	 5.Test all formats
 
 

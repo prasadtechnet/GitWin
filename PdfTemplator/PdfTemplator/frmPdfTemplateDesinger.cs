@@ -162,7 +162,7 @@ namespace PdfTemplator
                                     var lsTds = new List<TreeNode>();
                                     for (int i = 0; i < objColumns; i++)
                                     {
-                                        lsTds.Add(new TreeNode("td") { Tag = new ControlPropertyModel { ControlType = "Cell",Properties=new CellGridCalss { } } });
+                                        lsTds.Add(new TreeNode("Cell") { Tag = new ControlPropertyModel { ControlType = "Cell",Properties=new CellGridCalss { } },ContextMenu=cmCell });
                                     }
 
                                     AddTreeNodeToDocument(PrepareTreeNode("Row", new ControlPropertyModel { ControlType = "Row",Properties=new RowGridClass { } },lsTds));
@@ -211,13 +211,37 @@ namespace PdfTemplator
                     var objTab = objControl as TableGridClass;
                     if (objTab.NoOfColumn > 0)
                     {
-                        var lsTds = new List<TreeNode>();
-                        for (int i = 0; i < objTab.NoOfColumn; i++)
+                       
+                       
+                        var tRows = new List<TreeNode>();
+                        if (objTab.IsDynamic)
                         {
-                            lsTds.Add(new TreeNode("Cell") { Tag = new ControlPropertyModel { ControlType = "Cell", Properties = new CellGridCalss { } },ContextMenu= cmCell });
+                            var lsRowTds = new List<TreeNode>();
+                            var lsHeadTds = new List<TreeNode>();
+                            for (int i = 0; i < objTab.NoOfColumn; i++)
+                            {
+                                lsHeadTds.Add(new TreeNode("Cell",new TreeNode[] { new TreeNode("Label") {Tag=new ControlPropertyModel { ControlType="Label",Properties=PropertyGridManager.GetPropertyGridObject("Label")} } }) { Tag = new ControlPropertyModel { ControlType = "Cell", Properties = new CellGridCalss { } } });
+                                lsRowTds.Add(new TreeNode("Cell", new TreeNode[] { new TreeNode("Field") { Tag = new ControlPropertyModel { ControlType = "Field", Properties = PropertyGridManager.GetPropertyGridObject("Field") } } }) { Tag = new ControlPropertyModel { ControlType = "Cell", Properties = new CellGridCalss { } } });
+                            }
+                            tRows.Add(PrepareTreeNode("Header", new ControlPropertyModel { ControlType = "Row", Properties = new RowGridClass { } }, lsHeadTds));
+                            tRows.Add(PrepareTreeNode("Items", new ControlPropertyModel { ControlType = "Row", Properties = new RowGridClass { } }, lsRowTds));
+                        }
+                        else
+                        {
+                            var lsTds = new List<TreeNode>();
+                            for (int i = 0; i < objTab.NoOfColumn; i++)
+                            {
+                                lsTds.Add(new TreeNode("Cell") { Tag = new ControlPropertyModel { ControlType = "Cell", Properties = new CellGridCalss { } },ContextMenu=cmCell });
+                            }
+                            tRows.Add(PrepareTreeNode("Row", new ControlPropertyModel { ControlType = "Row", Properties = new RowGridClass { } }, lsTds));
                         }
 
-                        AddTreeNodeToDocument(PrepareTreeNode("Table", new ControlPropertyModel { ControlType = "Table", Properties = objTab }, new List<TreeNode> { PrepareTreeNode("Row", new ControlPropertyModel { ControlType = "Row", Properties = new RowGridClass { } }, lsTds) }));
+                      
+                            
+                        var tab = PrepareTreeNode("Table", new ControlPropertyModel { ControlType = "Table", Properties = objTab }, tRows);
+
+
+                        AddTreeNodeToDocument(tab);
                     }
                     else
                         MessageBox.Show("Parent table should have atleast one column");
@@ -255,6 +279,17 @@ namespace PdfTemplator
                     objControlUpdateObject.Properties=pgControlProps.SelectedObject;
 
                     tvDocument.SelectedNode.Tag = objControlUpdateObject;
+
+                    var modelFieldInfo = PropertyGridManager.GetModelFieldName(new ControlPropertyModel { ControlType = objControlUpdateObject.ControlType, Properties = objControl });
+                    if (modelFieldInfo != "")
+                    {
+                        var flds = modelFieldInfo.Split('-');
+                        if (lsModels.Where(x => x.ModelName == flds[0] && x.FieldName == flds[1]).FirstOrDefault() == null)
+                        {
+                            lsModels.Add(new GridModelProperty { ModelName = flds[0], FieldName = flds[1] });
+                            RefreshModelGrid();
+                        }
+                    }
 
                     ShowPropertyGrid(false);
                 }
@@ -295,7 +330,9 @@ namespace PdfTemplator
 
         private void RefreshModelGrid()
         {
-            dgvModels.Rows.Clear();
+            if(dgvModels.Rows.Count>0)
+               dgvModels.Rows.Clear();
+
             dgvModels.DataSource = lsModels;
             dgvModels.Refresh();
         }
@@ -470,10 +507,9 @@ namespace PdfTemplator
             if (t1.PrevNode != null)
             {
                 var t2 = t1.PrevNode;
-                var res = MergeNodes(t1, t2);
+                var res = MergeNodes(t1);
                 if (res != null)
-                {
-                   
+                {                   
                     tvDocument.SelectedNode = res;
                     tvDocument.SelectedNode.PrevNode.Remove();
                 }
@@ -489,7 +525,7 @@ namespace PdfTemplator
             if (t1.PrevNode != null)
             {
                 var t2 = t1.NextNode;
-                var res = MergeNodes(t1, t2);
+                var res = MergeNodes(t1);
                 if (res != null)
                 {
                     tvDocument.SelectedNode = res;
@@ -502,12 +538,17 @@ namespace PdfTemplator
         }
 
 
-        private TreeNode MergeNodes(TreeNode current,TreeNode mergewith)
+        private TreeNode MergeNodes(TreeNode current)
         {
             TreeNode tn=null;
             try
             {
-                current
+               var objNew= (current.Tag as ControlPropertyModel).Properties as CellGridCalss;
+                objNew.ColSpan += 1;
+
+                current.Tag = new ControlPropertyModel { ControlType = "Cell", Properties = objNew };
+
+                return current;
             }
             catch (Exception ex)
             {

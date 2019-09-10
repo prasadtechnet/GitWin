@@ -197,8 +197,20 @@ namespace PdfTemplator.UI.Business
                      
                     case "TABLE":
                         var objtbl = contM.Properties as TableGridClass;
-
-                        //PrepareMainTable(tNode.Nodes[0]);
+                        var parentTable = (tNode.Parent.Tag as ControlPropertyModel).Properties as CellGridCalss;
+                        cell= new TableCell {
+                            ColSpan = parentTable.ColSpan,
+                            RowSpan = parentTable.RowSpan,
+                            PTop = parentTable.PTop,
+                            PBottom = parentTable.PBottom,
+                            PLeft = parentTable.PLeft,
+                            PRight = parentTable.PRight,
+                            BorderPattren = parentTable.BorderPattren.ToString().Replace("_", ","),
+                            ContentType = "TABLECELL",
+                            TableHAlient= Master.Master.GetAlignmentNumber(parentTable.HAlign),
+                            TableVAlient= Master.Master.GetAlignmentNumber(parentTable.VAlign),
+                            tableModel =PrepareMainTable(tNode)
+                        };
                         break;
                     case "IMAGEURL":
                         var objimgUrl = contM.Properties as ImageUrlCellGridClass;
