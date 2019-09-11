@@ -16,9 +16,9 @@ namespace PdfTemplator.UI.Business
         private static Dictionary<string, string> htmlTagDictionary = new Dictionary<string, string>
         {
             { "SECTION","<div >#Val#</div>"},
-            { "TABLE","<table #attr# style='border:1px solid #272727' >#Val#</table>"},
+            { "TABLE","<table #attr# style='border-collapse: collapse;' >#Val#</table>"},
             { "ROW","<tr #attr# >#Val#<tr>"},
-            { "CELL","<td #attr# style='border:1px solid #655678'>#Val#</td>"},
+            { "CELL","<td #attr# >#Val#</td>"},
             { "LABEL","<span #attr# >#Val#</span>"},
             { "FIELD","<label #attr#> #Val#</label>"},
             { "IMAGE","<img #attr# />"},
@@ -138,7 +138,7 @@ namespace PdfTemplator.UI.Business
                         }
                        
                         strlblCell = strlblCell.Replace("#Val#", strChildCell);
-                        strlblCell = strlblCell.Replace("#attr#", GetAttr("", "", objCell.HAlign.ToString(), objCell.VAlign.ToString(), objCell.RowSpan.ToString(), objCell.ColSpan.ToString(), null, null, null, objCell.PLeft.ToString(), objCell.PRight.ToString(), objCell.PTop.ToString(), objCell.PBottom.ToString(), "", "","", ""));
+                        strlblCell = strlblCell.Replace("#attr#", GetAttr((objCell.Width*100).ToString(), "", objCell.HAlign.ToString(), objCell.VAlign.ToString(), objCell.RowSpan.ToString(), objCell.ColSpan.ToString(), null, null, null, objCell.PLeft.ToString(), objCell.PRight.ToString(), objCell.PTop.ToString(), objCell.PBottom.ToString(), "", "","", "",objCell.BorderPattren.ToString(),tN));
                         strRes = strlblCell;
                         break;
                     case "LABEL":
@@ -254,7 +254,7 @@ namespace PdfTemplator.UI.Business
             return strRes;
         }
 
-        private string GetAttr(string width="",string height="",string halign="",string valign="",string rowspan="",string colspan="",Font font=null, Color? color =null,Color? bgColor=null,string pLeft="", string pRight="", string pTop="", string pBottom="", string mLeft = "", string mRight = "", string mTop = "", string mBottom = "")
+        private string GetAttr(string width="",string height="",string halign="",string valign="",string rowspan="",string colspan="",Font font=null, Color? color =null,Color? bgColor=null,string pLeft="", string pRight="", string pTop="", string pBottom="", string mLeft = "", string mRight = "", string mTop = "", string mBottom = "",string borderPattren="",TreeNode tn=null)
         {
             var strRes = "";
             try
@@ -282,9 +282,50 @@ namespace PdfTemplator.UI.Business
                     lsStyle.Add("padding-top:"+pTop + " px");
                 if (!String.IsNullOrEmpty(pBottom))
                     lsStyle.Add("padding-bottom:"+pBottom + " px");
-              
-                //Margin
-                if (!String.IsNullOrEmpty(mLeft))
+                //Border
+                #region Border
+                if (!String.IsNullOrEmpty(borderPattren))
+                {
+                    var brdr = borderPattren.Split('_');
+                    if (brdr.Length == 4)
+                    {
+                        lsStyle.Add("border:1px solid black");
+                    }
+                    else
+                    {
+                        //border - style: solid;
+                        //border - width: medium;
+                        //border - color: red;
+                        //border - left: 6px solid red;
+                       
+                        foreach (var item in brdr)
+                        {
+                            switch (item.ToUpper())
+                            {
+                                case "L":
+                                    lsStyle.Add("border-left:1px solid black");
+                                    break;
+                                case "B":
+                                    lsStyle.Add("border-bottom:1px solid black");
+                                    break;
+                                case "T":
+                                    lsStyle.Add("border-top:1px solid black");
+                                    break;
+                                case "R":
+                                    lsStyle.Add("border-right:1px solid black");
+                                    break;
+                            }
+                        }
+                    }
+
+                }else
+                {
+                    lsStyle.Add("border:none");
+                }
+                #endregion
+
+                    //Margin
+                    if (!String.IsNullOrEmpty(mLeft))
                     lsStyle.Add("margin-left:" + mLeft + " px");
                 if (!String.IsNullOrEmpty(mRight))
                     lsStyle.Add("margin-right:" + mRight + " px");
@@ -310,6 +351,17 @@ namespace PdfTemplator.UI.Business
                     lsAttr.Add(" rowspan=\""+rowspan+"\"");
                 if (!String.IsNullOrEmpty(colspan))
                     lsAttr.Add(" colspan=\"" + colspan + "\"");
+
+
+                //if (tn.Text.ToUpper() == "CELL")
+                //{
+
+                //    var tnTab = tn.Parent.Parent;
+                //   // var tabGCell=(tnTab.Tag as ControlPropertyModel).Properties as TableGridClass;
+
+                  
+
+                //}
 
                 if (lsAttr.Count > 0)
                     strRes=  String.Join("  ", lsAttr.ToArray());

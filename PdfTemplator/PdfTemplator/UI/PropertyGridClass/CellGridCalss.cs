@@ -41,5 +41,7 @@ namespace PdfTemplator.UI.PropertyGridClass
         public Alignment VAlign { get; set; } = Alignment.ALIGN_TOP;
         [CategoryAttribute("Cell Align"), DescriptionAttribute("Horizontal Alignment")]
         public Alignment HAlign { get; set; } = Alignment.ALIGN_LEFT;
+
+        public float Width { get; set; }
     }
 }

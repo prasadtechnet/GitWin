@@ -156,13 +156,13 @@ namespace PdfTemplator
                         {
                             if (tvDocument.SelectedNode.Tag != null)
                             {
-                                var objColumns = ((tvDocument.SelectedNode.Tag as ControlPropertyModel).Properties as TableGridClass).NoOfColumn;
-                                if (objColumns > 0)
+                                var objTab = ((tvDocument.SelectedNode.Tag as ControlPropertyModel).Properties as TableGridClass);
+                                if (objTab.NoOfColumn > 0)
                                 {
                                     var lsTds = new List<TreeNode>();
-                                    for (int i = 0; i < objColumns; i++)
+                                    for (int i = 0; i < objTab.NoOfColumn; i++)
                                     {
-                                        lsTds.Add(new TreeNode("Cell") { Tag = new ControlPropertyModel { ControlType = "Cell",Properties=new CellGridCalss { } },ContextMenu=cmCell });
+                                        lsTds.Add(new TreeNode("Cell") { Tag = new ControlPropertyModel { ControlType = "Cell",Properties=new CellGridCalss { Width = objTab.ColumnWidths[i] } },ContextMenu=cmCell });
                                     }
 
                                     AddTreeNodeToDocument(PrepareTreeNode("Row", new ControlPropertyModel { ControlType = "Row",Properties=new RowGridClass { } },lsTds));
@@ -220,8 +220,8 @@ namespace PdfTemplator
                             var lsHeadTds = new List<TreeNode>();
                             for (int i = 0; i < objTab.NoOfColumn; i++)
                             {
-                                lsHeadTds.Add(new TreeNode("Cell",new TreeNode[] { new TreeNode("Label") {Tag=new ControlPropertyModel { ControlType="Label",Properties=PropertyGridManager.GetPropertyGridObject("Label")} } }) { Tag = new ControlPropertyModel { ControlType = "Cell", Properties = new CellGridCalss { } } });
-                                lsRowTds.Add(new TreeNode("Cell", new TreeNode[] { new TreeNode("Field") { Tag = new ControlPropertyModel { ControlType = "Field", Properties = PropertyGridManager.GetPropertyGridObject("Field") } } }) { Tag = new ControlPropertyModel { ControlType = "Cell", Properties = new CellGridCalss { } } });
+                                lsHeadTds.Add(new TreeNode("Cell",new TreeNode[] { new TreeNode("Label") {Tag=new ControlPropertyModel { ControlType="Label",Properties=PropertyGridManager.GetPropertyGridObject("Label")} } }) { Tag = new ControlPropertyModel { ControlType = "Cell", Properties = new CellGridCalss { Width=objTab.ColumnWidths[i] } } });
+                                lsRowTds.Add(new TreeNode("Cell", new TreeNode[] { new TreeNode("Field") { Tag = new ControlPropertyModel { ControlType = "Field", Properties = PropertyGridManager.GetPropertyGridObject("Field") } } }) { Tag = new ControlPropertyModel { ControlType = "Cell", Properties = new CellGridCalss { Width = objTab.ColumnWidths[i] } } });
                             }
                             tRows.Add(PrepareTreeNode("Header", new ControlPropertyModel { ControlType = "Row", Properties = new RowGridClass { } }, lsHeadTds));
                             tRows.Add(PrepareTreeNode("Items", new ControlPropertyModel { ControlType = "Row", Properties = new RowGridClass { } }, lsRowTds));
@@ -231,7 +231,7 @@ namespace PdfTemplator
                             var lsTds = new List<TreeNode>();
                             for (int i = 0; i < objTab.NoOfColumn; i++)
                             {
-                                lsTds.Add(new TreeNode("Cell") { Tag = new ControlPropertyModel { ControlType = "Cell", Properties = new CellGridCalss { } },ContextMenu=cmCell });
+                                lsTds.Add(new TreeNode("Cell") { Tag = new ControlPropertyModel { ControlType = "Cell", Properties = new CellGridCalss { Width = objTab.ColumnWidths[i] } },ContextMenu=cmCell });
                             }
                             tRows.Add(PrepareTreeNode("Row", new ControlPropertyModel { ControlType = "Row", Properties = new RowGridClass { } }, lsTds));
                         }
